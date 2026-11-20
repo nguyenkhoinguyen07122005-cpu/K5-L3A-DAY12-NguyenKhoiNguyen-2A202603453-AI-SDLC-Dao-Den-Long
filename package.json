@@ -1,6 +1,6 @@
 {
   "name": "dao-den-long",
-  "version": "1.2.0-phase3",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Dao Den Long - game 3D (logic thuan, chay duoc headless)",
@@ -9,7 +9,9 @@
     "play": "node scripts/serve.mjs",
     "headless": "node src/headless/cli.mjs",
     "bot": "node scripts/bot.mjs",
-    "evidence": "node scripts/evidence.mjs"
+    "evidence": "node scripts/evidence.mjs",
+    "bench": "node scripts/bench.mjs",
+    "soak": "node scripts/soak.mjs"
   },
   "engines": {
     "node": ">=20"

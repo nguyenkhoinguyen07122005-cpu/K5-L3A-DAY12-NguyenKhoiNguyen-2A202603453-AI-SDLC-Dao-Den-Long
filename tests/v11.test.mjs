@@ -13,7 +13,7 @@ test("[AC-01] so chuan Ticket-02 + khoa moi cua contract v1.1", () => {
   const exp = { player_speed: 6, carry_capacity: 10, lantern_cost: 10, pickup_radius: 1, interact_radius: 2, pulse_cost: 3, pulse_radius: 5, night1_duration_s: 240, night2_duration_s: 270, night3_duration_s: 300, flames: 3, invuln_s: 1.5, hit_drop_ratio: 0.5, pulse_stun_s: 2, pulse_push_m: 4, pulse_cooldown_s: 3, safe_radius: 6, shade_speed: 4, shade_hit_radius: 1, fall_enabled: true, dash_speed: 14, dash_duration_s: 0.2, dash_cooldown_s: 1.5 };
   for (const [k, v] of Object.entries(exp)) assert.equal(T[k], v, `tuning.${k}`);
   assert.deepEqual(T.score, { per_mote: 5, per_lantern: 100, per_relight: 40, per_stun: 5, per_stun_drain: 15, per_dawn_lantern: 50, per_flame_left: 50 });
-  assert.equal(T.contract_version ?? JSON.parse(JSON.stringify(CONTRACT)).contract_version, "1.2");
+  assert.equal(T.contract_version ?? JSON.parse(JSON.stringify(CONTRACT)).contract_version, "1.3"); // v1.3 (Ticket-04) thay v1.2; moi khoa v1.0-v1.2 giu nguyen
 });
 
 test("[AC-02] --night 1|2|3: night_start, so den (5/6/7), thoi luong (240/270/300 theo Ticket-03), truong snapshot", () => {
