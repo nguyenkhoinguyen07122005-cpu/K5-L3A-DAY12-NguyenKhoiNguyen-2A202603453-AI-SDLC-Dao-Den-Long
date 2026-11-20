@@ -19,6 +19,12 @@
   #timer small { display:block; font-size:11px; font-weight:400; opacity:.75; }
   #topright { top:12px; right:12px; text-align:right; }
   #lanternCount { font-size:20px; font-weight:700; }
+  #lanternCount.danger::before { content:'⚠ '; }
+  #cap { font-size:14px; opacity:.9; }
+  body.cb { --danger:#FFFFFF; }
+  body.cb #banner.danger { color:#FFFFFF; border:1px solid #FFFFFF; }
+  #banner.danger { color:var(--danger); }
+  #timer.low::before { content:'⚠ '; }
   #score { font-size:26px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
   #motebar { bottom:18px; left:50%; transform:translateX(-50%); display:flex; gap:5px; padding:8px 12px; }
   #motebar i { width:18px; height:18px; border-radius:50%; background:rgba(245,241,230,.16); display:inline-block; }
@@ -66,6 +72,7 @@
 <div class="hud box" id="timer"><span id="time">5:00</span><small id="nightName"></small></div>
 <div class="hud box" id="topright">
   <div id="lanternCount">0/5 đèn</div>
+  <div id="cap">✦ 0/10</div>
   <div id="score">0</div>
 </div>
 <div class="hud box" id="charm">🧣 Bùa Gió <span id="charmS"></span></div>
