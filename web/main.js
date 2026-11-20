@@ -574,6 +574,10 @@ function hide() {
 const ACT = {
   play: () => startRun(1),
   help: () => showHelp(),
+  nights: () => showNightSelect(),
+  night1: () => startRun(1),
+  night2: () => startRun(2),
+  night3: () => startRun(3),
   menu: () => toMenu(),
   settings: () => showSettings(),
   continue: () => {
@@ -596,9 +600,21 @@ function toMenu() {
     `<h1>Đảo Đèn Lồng</h1><h2>Mây và ba hòn đảo</h2>
      <p>Mây phải thắp sáng những ngọn đèn trên ba hòn đảo trước bình minh.</p>
      <button class="primary" data-act="play">Bắt đầu ▶</button>
+     <button data-act="nights">Chọn đêm</button>
      <button data-act="help">Hướng dẫn</button>
      <button data-act="settings">Cài đặt</button>`,
     ACT.play,
+  );
+}
+
+function showNightSelect() {
+  show(
+    `<h1>Chọn đêm</h1><h2>Chơi thẳng một đêm; thắng đêm nào thì sang đêm kế như thường</h2>
+     <button class="primary" data-act="night1">Đêm 1 — ${NIGHTS[1].name}</button>
+     <button data-act="night2">Đêm 2 — ${NIGHTS[2].name}</button>
+     <button data-act="night3">Đêm 3 — ${NIGHTS[3].name}</button>
+     <button data-act="menu">Quay lại</button>`,
+    ACT.night1,
   );
 }
 
