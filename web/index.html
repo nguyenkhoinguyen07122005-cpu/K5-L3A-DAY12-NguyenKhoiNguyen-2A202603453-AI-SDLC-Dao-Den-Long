@@ -6,61 +6,75 @@
 <title>Đảo Đèn Lồng</title>
 <style>
   /* Bang mau co dinh (Ticket-02, Part 3): UI text #F5F1E6, vang #F2C14E, nguy hiem #FF5A5F, Gio Lac #8FA3B8 */
-  :root { --ink:#F5F1E6; --gold:#F2C14E; --danger:#FF5A5F; --wind:#8FA3B8; --lamp:#FFB347; --panel:rgba(14,20,48,.66); }
+  :root { --fs:1; --ink:#F5F1E6; --gold:#F2C14E; --danger:#FF5A5F; --wind:#8FA3B8; --lamp:#FFB347; --panel:rgba(14,20,48,.66); }
+  body.big { --fs:1.25; }
+  body { font-size:calc(18px * var(--fs)); }
+  body.rm *, body.rm *::before { animation:none !important; transition:none !important; }
   html, body { margin:0; height:100%; overflow:hidden; background:#0E1430; font-family: system-ui, "Segoe UI", sans-serif; color:var(--ink); }
   canvas#view { position:fixed; inset:0; width:100%; height:100%; display:block; }
   .hud { position:fixed; pointer-events:none; }
   body.nohud .hud, body.nohud #arrow { display:none !important; }
   .box { background:var(--panel); border:1px solid rgba(245,241,230,.14); border-radius:12px; padding:8px 14px; }
-  #flames { top:12px; left:12px; font-size:24px; letter-spacing:3px; }
-  #timer { top:12px; left:50%; transform:translateX(-50%); font-size:32px; font-weight:700; font-variant-numeric:tabular-nums; text-align:center; min-width:96px; }
+  #flames { top:12px; left:12px; font-size:calc(24px * var(--fs)); letter-spacing:3px; }
+  #timer { top:12px; left:50%; transform:translateX(-50%); font-size:calc(32px * var(--fs)); font-weight:700; font-variant-numeric:tabular-nums; text-align:center; min-width:96px; }
   #timer.low { color:var(--danger); }
   #timer.low.blink { opacity:.25; }
-  #timer small { display:block; font-size:11px; font-weight:400; opacity:.75; }
+  #timer small { display:block; font-size:calc(18px * var(--fs)); font-weight:400; opacity:.75; }
   #topright { top:12px; right:12px; text-align:right; }
-  #lanternCount { font-size:20px; font-weight:700; }
+  #lanternCount { font-size:calc(20px * var(--fs)); font-weight:700; }
   #lanternCount.danger::before { content:'⚠ '; }
-  #cap { font-size:14px; opacity:.9; }
+  #cap { font-size:calc(18px * var(--fs)); opacity:.9; }
   body.cb { --danger:#FFFFFF; }
   body.cb #banner.danger { color:#FFFFFF; border:1px solid #FFFFFF; }
   #banner.danger { color:var(--danger); }
   #timer.low::before { content:'⚠ '; }
-  #score { font-size:26px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
+  #score { font-size:calc(26px * var(--fs)); font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; }
   #motebar { bottom:18px; left:50%; transform:translateX(-50%); display:flex; gap:5px; padding:8px 12px; }
   #motebar i { width:18px; height:18px; border-radius:50%; background:rgba(245,241,230,.16); display:inline-block; }
   #motebar i.on { background:#FFF6C2; box-shadow:0 0 8px #FFE58A; }
   #cds { bottom:18px; right:18px; display:flex; gap:10px; }
-  .cd { position:relative; width:54px; height:54px; border-radius:12px; text-align:center; background:var(--panel); border:1px solid rgba(245,241,230,.2); overflow:hidden; font-size:11px; }
-  .cd b { display:block; font-size:20px; margin-top:6px; }
+  .cd { position:relative; width:112px; height:76px; white-space:nowrap; border-radius:12px; text-align:center; background:var(--panel); border:1px solid rgba(245,241,230,.2); overflow:hidden; font-size:calc(18px * var(--fs)); }
+  .cd b { display:block; font-size:calc(20px * var(--fs)); margin-top:6px; }
   .cd .fill { position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.6); height:0; }
   .cd.ready { border-color:var(--gold); }
-  #prompt { bottom:70px; left:50%; transform:translateX(-50%); font-size:16px; opacity:0; color:var(--gold); }
+  #prompt { bottom:70px; left:50%; transform:translateX(-50%); font-size:calc(18px * var(--fs)); opacity:0; color:var(--gold); }
   #prompt.show { opacity:1; }
-  #banner { top:92px; left:50%; transform:translateX(-50%); font-size:18px; opacity:0; transition:opacity .25s; text-align:center; }
+  #banner { top:92px; left:50%; transform:translateX(-50%); font-size:calc(18px * var(--fs)); opacity:0; transition:opacity .25s; text-align:center; }
   #banner.show { opacity:1; }
   #banner.wind { color:var(--wind); border-color:var(--wind); }
   #charm { top:70px; left:12px; color:#C8102E; font-weight:700; opacity:0; }
   #charm.show { opacity:1; background:var(--panel); }
-  #arrow { position:fixed; width:34px; height:34px; margin:-17px 0 0 -17px; pointer-events:none; display:none; color:var(--gold); font-size:30px; text-align:center; line-height:34px; text-shadow:0 0 8px #000; }
+  #arrow { position:fixed; width:34px; height:34px; margin:-17px 0 0 -17px; pointer-events:none; display:none; color:var(--gold); font-size:calc(30px * var(--fs)); text-align:center; line-height:34px; text-shadow:0 0 8px #000; }
+  #subs { top:150px; left:50%; transform:translateX(-50%); text-align:center; display:none; max-width:70vw; }
+  #subs.show { display:block; }
+  #subs div { margin:2px 0; }
+  #arrow2 { position:fixed; width:44px; height:44px; margin:-22px 0 0 -22px; pointer-events:none; display:none; color:var(--danger); font-size:34px; text-align:center; line-height:44px; text-shadow:0 0 8px #000; }
+  body.cb #arrow2 { color:#FFFFFF; }
+  .krow { display:flex; justify-content:space-between; align-items:center; gap:14px; margin:6px 0; text-align:left; }
+  .krow button { width:170px !important; margin:0 !important; padding:6px 10px !important; }
+  #screen table.lb { width:100%; border-collapse:collapse; text-align:left; margin:10px 0; }
+  #screen table.lb td, #screen table.lb th { padding:4px 8px; border-bottom:1px solid rgba(245,241,230,.15); }
+  #screen input[type=text] { width:100%; box-sizing:border-box; padding:9px 12px; font-size:18px; color:var(--ink); background:rgba(245,241,230,.1); border:1px solid rgba(245,241,230,.4); border-radius:8px; font-family:inherit; }
+  #screen .msg { min-height:1.6em; }
   #flash { position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse at center, rgba(255,90,95,0) 40%, rgba(255,90,95,.7) 100%); opacity:0; transition:opacity .35s; }
   #flash.on { opacity:1; transition:none; }
-  #fps { top:70px; right:12px; font-size:12px; display:none; }
+  #fps { top:70px; right:12px; font-size:calc(18px * var(--fs)); display:none; }
   #screen { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(14,20,48,.74); text-align:center; }
   #screen.hidden { display:none; }
-  #screen .card { max-width:640px; padding:28px 34px; background:rgba(14,20,48,.94); border:1px solid rgba(242,193,78,.5); border-radius:18px; box-shadow:0 0 50px rgba(242,193,78,.18); }
-  #screen h1 { margin:0 0 6px; font-size:34px; color:var(--gold); }
-  #screen h2 { margin:0 0 10px; font-size:15px; font-weight:400; opacity:.8; letter-spacing:.12em; text-transform:uppercase; }
+  #screen .card { max-width:640px; max-height:94vh; overflow-y:auto; box-sizing:border-box; padding:22px 34px; background:rgba(14,20,48,.94); border:1px solid rgba(242,193,78,.5); border-radius:18px; box-shadow:0 0 50px rgba(242,193,78,.18); }
+  #screen h1 { margin:0 0 6px; font-size:calc(34px * var(--fs)); color:var(--gold); }
+  #screen h2 { margin:0 0 10px; font-size:calc(18px * var(--fs)); font-weight:400; opacity:.8; letter-spacing:.12em; text-transform:uppercase; }
   #screen p { margin:8px 0; line-height:1.5; }
-  #screen .big { font-size:20px; }
+  #screen .big { font-size:calc(20px * var(--fs)); }
   #screen .quote { font-style:italic; opacity:.92; border-left:3px solid var(--gold); padding-left:12px; text-align:left; }
   #screen kbd, .help kbd { background:rgba(245,241,230,.14); border-radius:5px; padding:1px 6px; font-family:inherit; }
-  #screen .go { margin-top:16px; font-size:16px; color:var(--gold); animation:pulse 1.4s infinite; }
-  #screen button { display:block; width:100%; margin:8px 0; padding:11px 16px; font-size:17px; color:var(--ink); background:rgba(245,241,230,.08); border:1px solid rgba(245,241,230,.28); border-radius:10px; cursor:pointer; font-family:inherit; }
+  #screen .go { margin-top:16px; font-size:calc(18px * var(--fs)); color:var(--gold); animation:pulse 1.4s infinite; }
+  #screen button { display:block; width:100%; margin:8px 0; padding:11px 16px; font-size:calc(18px * var(--fs)); color:var(--ink); background:rgba(245,241,230,.08); border:1px solid rgba(245,241,230,.28); border-radius:10px; cursor:pointer; font-family:inherit; }
   #screen button.primary { border-color:var(--gold); color:var(--gold); }
   #screen button:hover, #screen button:focus { background:rgba(242,193,78,.18); outline:none; }
   #screen label { display:flex; justify-content:space-between; align-items:center; gap:14px; margin:12px 0; }
   #screen input[type=range] { width:240px; }
-  .help { font-size:12.5px; opacity:.82; text-align:left; line-height:1.9; }
+  .help { font-size:calc(18px * var(--fs)); opacity:.82; text-align:left; line-height:1.9; }
   @keyframes pulse { 50% { opacity:.45; } }
 </style>
 </head>
@@ -77,6 +91,7 @@
 </div>
 <div class="hud box" id="charm">🧣 Bùa Gió <span id="charmS"></span></div>
 <div class="hud box" id="banner"></div>
+<div class="hud box" id="subs" role="status" aria-live="polite"></div>
 <div class="hud box" id="prompt"></div>
 <div class="hud box" id="motebar"></div>
 <div class="hud" id="cds">
@@ -84,6 +99,7 @@
   <div class="cd" id="cdPulse"><b>✦</b>Tỏa sáng<div class="fill"></div></div>
 </div>
 <div id="arrow">➤</div>
+<div id="arrow2">⚠</div>
 <div class="hud box" id="fps"></div>
 
 <div id="screen"><div class="card" id="card"></div></div>
@@ -97,10 +113,10 @@
   };
   window.addEventListener("error", function (e) {
     if (document.querySelector("#card h1") && document.querySelector("#card h1").dataset.fatal) return;
-    window.__ddlFatal("Có lỗi khi chạy game", "<p>Mở F12 → Console để xem chi tiết và gửi lại cho người phát triển.</p><p style='opacity:.7;font-size:13px'>" + String(e.message).replace(/</g, "&lt;") + "</p>");
+    window.__ddlFatal("Có lỗi khi chạy game", "<p>Mở F12 → Console để xem chi tiết và gửi lại cho người phát triển.</p><p style='opacity:.7;font-size:18px'>" + String(e.message).replace(/</g, "&lt;") + "</p>");
   });
   window.addEventListener("unhandledrejection", function (e) {
-    window.__ddlFatal("Có lỗi khi chạy game", "<p>Mở F12 → Console để xem chi tiết.</p><p style='opacity:.7;font-size:13px'>" + String(e.reason && e.reason.message || e.reason).replace(/</g, "&lt;") + "</p>");
+    window.__ddlFatal("Có lỗi khi chạy game", "<p>Mở F12 → Console để xem chi tiết.</p><p style='opacity:.7;font-size:18px'>" + String(e.reason && e.reason.message || e.reason).replace(/</g, "&lt;") + "</p>");
   });
 </script>
 <script type="module" src="./main.js"></script>
