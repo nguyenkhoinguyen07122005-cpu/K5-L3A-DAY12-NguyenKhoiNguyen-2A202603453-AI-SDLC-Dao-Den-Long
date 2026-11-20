@@ -2,7 +2,7 @@
 // Moi test ghi ma tieu chi chap nhan (AC-xx) trong docs/spec/phase-2.md.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { run, empty, T, near } from "./helpers.mjs";
+import { run, empty, T, near, CONTRACT } from "./helpers.mjs";
 
 const S = T.score;
 const at = (r, tick) => r.snaps.find((s) => s.tick === tick);
@@ -10,13 +10,14 @@ const evs = (r, name) => r.events.filter((e) => e.name === name);
 
 // ---------- Hop dong / so chuan ----------
 test("[AC-01] so chuan Ticket-02 + khoa moi cua contract v1.1", () => {
-  const exp = { player_speed: 6, carry_capacity: 10, lantern_cost: 10, pickup_radius: 1, interact_radius: 2, pulse_cost: 3, pulse_radius: 5, night1_duration_s: 300, night2_duration_s: 330, night3_duration_s: 360, flames: 3, invuln_s: 1.5, hit_drop_ratio: 0.5, pulse_stun_s: 2, pulse_push_m: 4, pulse_cooldown_s: 3, safe_radius: 6, shade_speed: 4, shade_hit_radius: 1, fall_enabled: true, dash_speed: 14, dash_duration_s: 0.2, dash_cooldown_s: 1.5 };
+  const exp = { player_speed: 6, carry_capacity: 10, lantern_cost: 10, pickup_radius: 1, interact_radius: 2, pulse_cost: 3, pulse_radius: 5, night1_duration_s: 240, night2_duration_s: 270, night3_duration_s: 300, flames: 3, invuln_s: 1.5, hit_drop_ratio: 0.5, pulse_stun_s: 2, pulse_push_m: 4, pulse_cooldown_s: 3, safe_radius: 6, shade_speed: 4, shade_hit_radius: 1, fall_enabled: true, dash_speed: 14, dash_duration_s: 0.2, dash_cooldown_s: 1.5 };
   for (const [k, v] of Object.entries(exp)) assert.equal(T[k], v, `tuning.${k}`);
-  assert.deepEqual(T.score, { per_mote: 10, per_lantern: 100, per_stun: 5, per_second_left: 2, per_flame_left: 50 });
+  assert.deepEqual(T.score, { per_mote: 5, per_lantern: 100, per_relight: 40, per_stun: 5, per_stun_drain: 15, per_dawn_lantern: 50, per_flame_left: 50 });
+  assert.equal(T.contract_version ?? JSON.parse(JSON.stringify(CONTRACT)).contract_version, "1.2");
 });
 
-test("[AC-02] --night 1|2|3: night_start, so den (5/6/7), thoi luong (300/330/360), truong snapshot v1.1", () => {
-  const want = { 1: [5, 300], 2: [6, 330], 3: [7, 360] };
+test("[AC-02] --night 1|2|3: night_start, so den (5/6/7), thoi luong (240/270/300 theo Ticket-03), truong snapshot", () => {
+  const want = { 1: [5, 240], 2: [6, 270], 3: [7, 300] };
   for (const n of [1, 2, 3]) {
     const r = run({ night: n, ticks: 0, scenario: empty() });
     assert.equal(r.status, 0);
@@ -25,7 +26,7 @@ test("[AC-02] --night 1|2|3: night_start, so den (5/6/7), thoi luong (300/330/36
     assert.equal(s.night, n);
     assert.equal(s.lanterns.length, want[n][0]);
     assert.equal(s.time_left_s, want[n][1]);
-    assert.deepEqual(Object.keys(s.player).sort(), ["carried", "charm_s", "dash_cd_s", "flames", "grounded", "invuln", "pos", "pulse_cd_s", "vel"]);
+    assert.deepEqual(Object.keys(s.player).sort(), ["capacity", "carried", "charm_s", "dash_cd_s", "flames", "grounded", "invuln", "pos", "pulse_cd_s", "vel"]);
     assert.deepEqual(s.wind, { active: false, dir_deg: 0 });
     for (const k of ["motes", "drifters", "charms"]) assert.ok(Array.isArray(s[k]), k);
   }
@@ -285,18 +286,25 @@ test("[AC-32] diem: +10 moi dom dom nap, +100 moi den, +5 moi Bong Muc bi tia sa
   assert.equal(r.snaps.at(-1).score, 2 * S.per_stun);
 });
 
-test("[AC-33] thang o tick het gio van la thang; thang -> game_over won, diem = diem + floor(giay con)*2 + 50*lua", () => {
-  const frames = [{ tick: 59, interact: true }];
-  const lit = ["L2", "L3", "L4", "L5"].map((id) => ({ id, lit: true }));
-  const r = run({ ticks: 100, scenario: empty({ time_left_s: 1, player: { carried: 10 }, lanterns: [{ id: "L1", pos: [0, 0, 1] }, ...lit] }), inputs: { frames } });
-  assert.deepEqual(r.events.at(-1), { type: "event", tick: 60, name: "game_over", data: { result: "won", reason: "all_lit" } });
-  assert.equal(r.end.score, 100 + 100 + 0 + 3 * S.per_flame_left);
+test("[AC-33] v1.2: thang o tick binh minh (du den sang); khong du den thi thua dawn; het lua o tick cuoi thi no_flames", () => {
+  const lit = (ids) => ids.map((id) => ({ id, lit: true }));
+  const win = run({ ticks: 100, scenario: empty({ time_left_s: 1, lanterns: lit(["L1", "L2", "L3"]) }) });
+  assert.deepEqual(win.events.at(-1), { type: "event", tick: 60, name: "game_over", data: { result: "won", reason: "dawn_survived" } });
+  const lose = run({ ticks: 100, scenario: empty({ time_left_s: 1, lanterns: lit(["L1", "L2"]) }) });
+  assert.deepEqual(lose.events.at(-1).data, { result: "lost", reason: "dawn" });
+  const last = run({ ticks: 100, scenario: empty({ time_left_s: 1, player: { flames: 1 }, lanterns: lit(["L1", "L2", "L3"]), shades: [{ pos: [0.5, 0, 0] }] }), inputs: { frames: [] } });
+  assert.deepEqual(last.events.at(-1).data, { result: "lost", reason: "no_flames" });
 });
 
-test("[AC-33] Dem 3: 7 den, thang khi thap het", () => {
-  const lit = ["L2", "L3", "L4", "L5", "L6", "L7"].map((id) => ({ id, lit: true }));
-  const r = run({ night: 3, ticks: 5, scenario: empty({ player: { pos: [0, 6, 5], carried: 10 }, lanterns: [{ id: "L1" }, ...lit] }), inputs: { frames: [{ tick: 0, interact: true }] } });
-  assert.equal(r.end.state, "won");
+test("[AC-33] v1.2: nguong thang = ceil(0.6 * tong den): Dem 1 -> 3/5, Dem 2 -> 4/6, Dem 3 -> 5/7", () => {
+  const need = { 1: 3, 2: 4, 3: 5 };
+  for (const n of [1, 2, 3]) {
+    const ids = (k) => Array.from({ length: k }, (_, i) => ({ id: `L${i + 1}`, lit: true }));
+    const ok = run({ night: n, ticks: 100, scenario: empty({ time_left_s: 1, lanterns: ids(need[n]) }) });
+    const no = run({ night: n, ticks: 100, scenario: empty({ time_left_s: 1, lanterns: ids(need[n] - 1) }) });
+    assert.equal(ok.end.state, "won", `dem ${n}`);
+    assert.equal(no.end.state, "lost", `dem ${n}`);
+  }
 });
 
 test("[AC-34] thu tu trong tick: Gio Lac cuop truoc, Bong Muc cham sau; bat tu khong chan viec cuop", () => {

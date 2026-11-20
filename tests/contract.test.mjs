@@ -58,7 +58,7 @@ test("[D] scenario: dung nguyen vi tri/so luong; dung scenario khong phat su kie
   assert.equal(s.motes_active, 2);
   assert.deepEqual(s.shades.map((x) => x.id), ["X9"]);
   const l2 = s.lanterns.find((l) => l.id === "L2");
-  assert.deepEqual(l2, { id: "L2", pos: [3, 0, 3], lit: true, deposited: 2 });
+  assert.deepEqual(l2, { id: "L2", pos: [3, 0, 3], lit: true, deposited: 2, fuel: 100, ever_lit: true, relit_count: 0 }); // v1.2: den dat lit:true khong co fuel -> fuel 100
   assert.equal(s.lanterns.length, T.lantern_count_night1);
   assert.equal(s.score, 0);
   assert.equal(r.events.length, 0);
@@ -157,7 +157,7 @@ test("[deposit + lantern_lit] nap du lantern_cost -> den sang, +per_lantern, car
   });
   assert.deepEqual(r.events.map((e) => [e.name, e.tick]), [["deposit", 1], ["lantern_lit", 1]]);
   assert.deepEqual(r.events[0].data, { lantern_id: "L1", amount: T.lantern_cost, deposited: T.lantern_cost });
-  assert.deepEqual(r.events[1].data, { lantern_id: "L1" });
+  assert.deepEqual(r.events[1].data, { lantern_id: "L1", relight: false });
   const s = r.snaps.at(-1);
   assert.equal(s.player.carried, 2);
   assert.equal(s.lanterns[0].lit, true);
@@ -312,21 +312,15 @@ test("[safe_radius] nguoi choi dung canh den da thap khong bi cham", () => {
 });
 
 // ---------- Thang / thua / diem ----------
-test("[game_over won] tha den cuoi cung -> thang ngay, diem thuong theo giay/mau con lai", () => {
-  const lit = ["L2", "L3", "L4", "L5"].map((id) => ({ id, lit: true }));
-  const r = run({
-    ticks: 600,
-    scenario: empty({ player: { carried: T.lantern_cost, flames: 2 }, lanterns: [{ id: "L1", pos: [0, 0, 1] }, ...lit] }),
-    inputs: { frames: [{ tick: 0, interact: true }] },
-  });
-  assert.deepEqual(r.events.map((e) => e.name), ["deposit", "lantern_lit", "game_over"]);
-  assert.deepEqual(r.events.at(-1).data, { result: "won", reason: "all_lit" });
-  const secondsLeft = Math.floor(T.night1_duration_s - 1 / 60);
-  const expected = S.per_lantern + T.lantern_cost * S.per_mote + secondsLeft * S.per_second_left + 2 * S.per_flame_left;
-  assert.deepEqual(r.end, { type: "end", ticks: 1, state: "won", score: expected });
+test("[game_over won] v1.2: thap du den KHONG ket thuc som; song toi binh minh voi du den thi thang (dawn_survived), diem theo dau con lai", () => {
+  const all = ["L1", "L2", "L3", "L4", "L5"].map((id) => ({ id, lit: true }));
+  const r = run({ ticks: 600, scenario: empty({ time_left_s: 2, player: { flames: 2 }, lanterns: all }) });
+  assert.deepEqual(r.events.at(-1), { type: "event", tick: 120, name: "game_over", data: { result: "won", reason: "dawn_survived" } });
+  const fuelEach = Math.floor((T.fuel_max * 60 - 120 * (T.fuel_decay_per_s)) / 60); // 100 - 2 s hao = 98
+  assert.deepEqual(r.end, { type: "end", ticks: 120, state: "won", score: 5 * (S.per_dawn_lantern + fuelEach) + 2 * S.per_flame_left });
 });
 
-test("[game_over lost dawn] het gio -> thua 'dawn' dung tick time_left_s*60", () => {
+test("[game_over lost dawn] het gio khi chua du den sang -> thua 'dawn' dung tick time_left_s*60", () => {
   const r = run({ ticks: 1000, scenario: empty({ time_left_s: 2 }) });
   assert.deepEqual(r.events.at(-1), { type: "event", tick: 120, name: "game_over", data: { result: "lost", reason: "dawn" } });
   assert.deepEqual(r.end, { type: "end", ticks: 120, state: "lost", score: 0 });
@@ -406,8 +400,9 @@ test("[loi] file khong ton tai -> 2; thieu tham so / sai tham so -> ma thoat kha
 test("[contract] game.contract.json: du truong, lantern_count_night1 = 5, khong con so 0 'chua dien'", () => {
   for (const k of ["contract_version", "team", "build_cmd", "run_cmd", "headless_cmd", "tuning"]) assert.ok(k in JSON.parse(JSON.stringify(T)) || true);
   assert.equal(T.lantern_count_night1, 5);
-  const need = ["player_speed", "carry_capacity", "lantern_cost", "pickup_radius", "interact_radius", "pulse_cost", "pulse_radius", "night1_duration_s", "flames", "invuln_s", "hit_drop_ratio", "pulse_stun_s", "pulse_push_m", "pulse_cooldown_s", "safe_radius", "shade_speed", "shade_hit_radius", "fall_enabled", "score"];
+  const need = ["fuel_max", "fuel_decay_per_s", "fuel_per_mote", "relight_cost", "win_ratio", "drain_per_s", "low_fuel_threshold", "capacity_max", "player_speed", "carry_capacity", "lantern_cost", "pickup_radius", "interact_radius", "pulse_cost", "pulse_radius", "night1_duration_s", "flames", "invuln_s", "hit_drop_ratio", "pulse_stun_s", "pulse_push_m", "pulse_cooldown_s", "safe_radius", "shade_speed", "shade_hit_radius", "fall_enabled", "score"];
   for (const k of need) assert.ok(k in T, `thieu tuning.${k}`);
-  for (const k of ["per_mote", "per_lantern", "per_stun", "per_second_left", "per_flame_left"]) assert.ok(k in T.score);
+  for (const k of ["per_mote", "per_lantern", "per_relight", "per_stun", "per_stun_drain", "per_dawn_lantern", "per_flame_left"]) assert.ok(k in T.score);
+  assert.ok(!("per_second_left" in T.score), "v1.2: bo thuong thoi gian");
   assert.ok(T.safe_radius > T.shade_hit_radius, "Bong Muc o bien vung an toan khong the cham nguoi dung canh den");
 });

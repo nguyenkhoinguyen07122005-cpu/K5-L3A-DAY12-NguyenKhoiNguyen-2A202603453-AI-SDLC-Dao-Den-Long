@@ -3,20 +3,32 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { playBot } from "../scripts/bot.mjs";
 
-test("[winnable] Dem 1: bot ngay tho (chi biet ne + nhat + thap) van thang >= 20% so seed voi so chuan Ticket-02", () => {
+test("[winnable] Dem 1 (v1.2): bot song toi binh minh voi >= 3/5 den sang, thang >= 15% so seed (co Bong Muc, Gio Lac, hut dau)", () => {
   let wins = 0;
-  for (let seed = 1; seed <= 20; seed++) if (playBot(seed).state === "won") wins++;
-  assert.ok(wins >= 4, `bot chi thang ${wins}/20`);
+  for (let seed = 1; seed <= 20; seed++) {
+    const r = playBot(seed);
+    if (r.state === "won") {
+      wins++;
+      assert.equal(r.reason, "dawn_survived");
+      assert.ok(r.lit >= r.need);
+    }
+  }
+  assert.ok(wins >= 3, `bot chi thang ${wins}/20`);
 });
 
-test("[winnable] Dem 2 va Dem 3: khi tat Bong Muc/Gio Lac, bot toi du moi den (qua cau, doc, buc nhay) va thang", () => {
+test("[winnable] v1.2: khi tat Bong Muc/Gio Lac, bot thang Dem 1 (>=8/10) va Dem 2 (>=5/10); Dem 3 thang voi capacity 14 (successful_lights 3)", () => {
   const calm = { random_shades: false, random_drifters: false };
-  const n2 = playBot(1, "good", 2, calm);
-  assert.equal(n2.state, "won", JSON.stringify(n2));
-  assert.equal(n2.lit, 6);
-  const n3 = playBot(2, "good", 3, calm);
-  assert.equal(n3.state, "won", JSON.stringify(n3));
-  assert.equal(n3.lit, 7);
+  let w1 = 0;
+  let w2 = 0;
+  let w3 = 0;
+  for (let seed = 1; seed <= 10; seed++) {
+    if (playBot(seed, "good", 1, calm).state === "won") w1++;
+    if (playBot(seed, "good", 2, calm).state === "won") w2++;
+    if (playBot(seed, "good", 3, { ...calm, player: { successful_lights: 3 } }).state === "won") w3++;
+  }
+  assert.ok(w1 >= 8, `dem 1: ${w1}/10`);
+  assert.ok(w2 >= 5, `dem 2: ${w2}/10`);
+  assert.ok(w3 >= 2, `dem 3: ${w3}/10`);
 });
 
 test("[winnable] dung yen thi THUA (game khong tu thang)", () => {
