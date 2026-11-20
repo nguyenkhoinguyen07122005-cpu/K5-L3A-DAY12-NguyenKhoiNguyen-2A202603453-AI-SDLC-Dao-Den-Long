@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | 1 | Claude (claude.ai), model Claude Sonnet 5.5 | Không đo được số token chính xác (claude.ai chỉ hiển thị % quota, tính chung mọi cuộc trò chuyện). Ước tính: Phase 1 dùng 1 cuộc trò chuyện dài trên claude.ai (Claude Sonnet 5.5). Lúc 14:35 ngày 20/11/2026, Settings → Usage hiển thị: phiên hiện tại 20% đã dùng, tuần này 64% đã dùng | Lõi mô phỏng tất định + headless theo Test Contract (`src/core`, `src/headless`), 53 test, bot tự chơi, bản chơi 3D Three.js, tài liệu | Dán nguyên văn Test Contract một lần thay vì mô tả lại; làm lõi + test trước, đồ họa sau; chỉ một ý sáng tạo nhỏ (hiển thị), không thêm cơ chế |
 | 2 | Claude (claude.ai), model Claude Sonnet 5.5 | Ước tính, không đo được số token: trang Settings → Usage chỉ hiện %. Hạn mức tuần tăng từ 64% lên 67% (khoảng 3%) trong lúc làm Phase 2 (15:02 đến 15:37 ngày 20/11/2026); hạn mức phiên hiện tại hiện 43% (phiên bắt đầu 13:10, gồm cả cuối Phase 1). Số này có thể lẫn các chat khác cùng tài khoản. | Số chuẩn Ticket-02, 3 bản đồ (cầu, dốc, bục nhảy, tháp), lướt, rơi/hồi sinh, Gió Lạc, Bùa Gió, gió, tạm dừng; Contract v1.1; 34 test mới; chuỗi 3 Đêm, HUD, âm thanh, cài đặt | Dán nguyên văn ticket một lần; viết lõi + test trước, giao diện sau; bot tự chơi thay cho chơi tay để kiểm bản đồ; dùng Playwright đo FPS thay vì đoán |
-| 3 | | | | |
+| 3 | Claude (claude.ai, Claude Sonnet 5.5) |Ước tính: ~3% hạn mức tuần gói Claude Pro (tuần từ 67% lên 70% theo Settings → Usage), phiên hiện tại 60% lúc 16:51. Claude không công bố số token, nên ghi theo phần trăm hạn mức. Một phần số này có thể gồm các chat khác trong cùng tuần.| Ticket-03: nhiên liệu đèn, Bóng Mực `drain`, thắng ở bình minh, sức chứa động, điểm mới, bảng màu dễ phân biệt; Contract v1.2; 18 test mới, sửa 9 test cũ có lý do; ADR + CHANGELOG | Dán nguyên văn ticket một lần; giữ nguyên thứ tự lõi → test → tài liệu → giao diện; bot tự chơi để đo cân bằng thay vì chơi tay |
 | 4 | | | | |
 
 ## Lần AI sai
@@ -22,5 +22,11 @@
 | 2 | Giả sử "trần 30 đom đóm" đạt được ở mọi Đêm, nhưng Đêm 1 chỉ có 24 điểm sinh nên tối đa 24 | Test đỏ: số đom đóm dừng ở 24 | Giữ đúng luật "hết điểm trống thì bỏ lượt", ghi P2-6, test cả hai Đêm |
 | 2 | Bot né Bóng Mực đẩy chính nó ra khỏi đảo (rơi) và bot Đêm 2 đi thẳng khỏi cầu | Chạy bot 20 seed, thắng 0/20, đọc dòng sự kiện một seed | Chặn hướng né nếu mặt đất phía trước trống, thêm điểm trung gian qua cầu/dốc/bục; có chế độ `--calm` chứng minh mọi đèn tới được |
 | 2 | Test "vách tầng 2 không leo được" đặt người chơi sát bục nhảy nên bị bắn lên (y>3) | Test đỏ, in vị trí | Đổi điểm xuất phát; ghi rõ bục nhảy trong spec |
+| 3 | Bản đầu cho Bóng Mực wander đi tới đèn tắt gần nhất: bóng đứng chắn đèn, bot thắng 1/20 | Chạy bot, in dòng sự kiện một seed: mang đủ 10 đom đóm cả đêm mà không thắp được | Hoàn lại lang thang như Phase 2 (P3-3), ghi vào ADR |
+| 3 | Bot ưu tiên châm dầu đèn còn nhiều, nên chỉ thắp được 3 đèn khi cần 4 | Trace sự kiện: nhiều `refuel`, ít `lantern_lit` | Viết lại mục tiêu bot theo kinh tế (thắp tới đủ ngưỡng, chỉ châm khi sắp cạn) và chỉ thắp ở ~90–140 s cuối |
+| 3 | Bot cắt chéo khỏi cầu tre khi đổi mục tiêu giữa cầu (rơi, mất lửa) | Trace: `player_hit by fall` | Thêm luật: đang trên cầu thì đi hết cầu rồi mới rẽ |
+| 3 | Test nhặt đom đóm đặt 14 đom đóm cách nhau 0.1 m nên chỉ 11 cái nằm trong bán kính nhặt 1 m | Test đỏ (11 thay vì 14) | Đổi khoảng cách 0.05 m |
+| 3 | Kỳ vọng `fuel_drain` ở tick 60 và `fuel` 14.0, nhưng bóng vào `drain` sau bước trừ dầu của tick 1 | Test đỏ, đọc snapshot | Sửa kỳ vọng (61, 121; 59 tick hút) và ghi P3-5 |
+
 
 

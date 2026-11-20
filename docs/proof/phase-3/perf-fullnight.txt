@@ -1,6 +1,6 @@
-commit: 30a08e8d88732cf66ffa705a4cb464ab1d8b8621
-thoi gian (UTC): 2026-11-20T09:48:19.575Z
+commit: c49cebe27d64e5ddf598d47216a69ab93ab047eb (+ thay doi chua commit)
+thoi gian (UTC): 2026-11-20T09:53:27.930Z
 Moi Dem chay du 21600 tick (nguoi choi dung yen, 1.000.000 ngon lua de khong thua som, ket thuc o tick 21600 (dawn)), do bang dong ho tuong.
-Dem 1: exit 0, 0.33 s (gioi han 30 s), giong het lan 2: true, dong cuoi: {"type":"end","ticks":21600,"state":"lost","score":0}
-Dem 2: exit 0, 0.41 s (gioi han 30 s), giong het lan 2: true, dong cuoi: {"type":"end","ticks":21600,"state":"lost","score":0}
-Dem 3: exit 0, 0.46 s (gioi han 30 s), giong het lan 2: true, dong cuoi: {"type":"end","ticks":21600,"state":"lost","score":0}
+Dem 1: exit 0, 0.38 s (gioi han 30 s), giong het lan 2: true, dong cuoi: {"type":"end","ticks":21600,"state":"lost","score":0}
+Dem 2: exit 0, 0.46 s (gioi han 30 s), giong het lan 2: true, dong cuoi: {"type":"end","ticks":21600,"state":"lost","score":0}
+Dem 3: exit 0, 0.48 s (gioi han 30 s), giong het lan 2: true, dong cuoi: {"type":"end","ticks":21600,"state":"lost","score":0}
