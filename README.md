@@ -1,6 +1,6 @@
-# Đảo Đèn Lồng
+﻿# Đảo Đèn Lồng
 
-> **Video demo:** (sẽ thêm khi có Release `v1.0.0`)
+> **Video demo:** chưa có (bỏ qua ở Phase 4). Minh chứng chạy thật: `bench.json`, `soak.json`, `docs/proof/` và ảnh trong `docs/media/`.
 
 Game 3D góc nhìn thứ ba: **Mây**, người giữ đèn nhỏ tuổi đội nón lá, chạy khắp đảo nhặt đom đóm để thắp lại 5 Đèn Lồng Lớn, và né **Bóng Mực** trong sương đen. Bài Day 12 (AI SDLC) của Nguyễn Khôi Nguyên, MSSV 2A202603453.
 
@@ -13,10 +13,10 @@ Ba Đêm: **Đảo Bến** (đảo tròn), **Đảo Cau** (hai đảo nối bằ
 ```bash
 npm install      # không có thư viện ngoài (Three.js đã kèm trong web/vendor), lệnh này chạy gần như tức thì
 npm run play     # mở http://localhost:8080 trên trình duyệt (đổi cổng: PORT=9000 npm run play)
-npm test         # 105 test: Test Contract v1.2, tất định, bot thắng được, lõi thuần
+npm test         # ~113 test: Test Contract v1.0–v1.3, tất định, bot thắng được, lõi thuần, bảng xếp hạng
 ```
 
-Chế độ headless (theo Test Contract v1.2, không cần cửa sổ/GPU; `--night` nhận 1, 2, 3):
+Chế độ headless (theo Test Contract v1.3, không cần cửa sổ/GPU; `--night` nhận 1, 2, 3):
 
 ```bash
 node src/headless/cli.mjs --seed 42 --night 2 --ticks 3000 --out out.jsonl \
@@ -26,7 +26,14 @@ node src/headless/cli.mjs --seed 42 --night 2 --ticks 3000 --out out.jsonl \
 Bot tự chơi để kiểm tra màn chơi thắng được: `npm run bot -- --night 1` (đứng yên thì thua; thêm `--calm` để tắt kẻ địch và chứng minh mọi đèn trên Đêm 2/3 đều tới được; `--sl 3` khởi đầu với sức chứa 16, dùng cho Đêm 3).
 Địa chỉ tiện cho người chấm: `http://localhost:8080/web/index.html?autostart&night=3&fps` (vào thẳng Đêm 3, hiện FPS).
 
-## Điều khiển
+## Yêu cầu hệ thống
+
+- Node.js ≥ 20 (để chạy máy chủ tĩnh, test, headless, bench, soak). Windows 10/11, macOS hoặc Linux.
+- Để chơi: Chrome hoặc Edge bản mới (WebGL2). Cần GPU thật để đạt 60 FPS; máy không GPU vẫn chơi được nhưng chậm (có chế độ đồ họa thấp tự bật).
+- Để chạy `bench`: Chrome hoặc Edge đã cài (script tự tìm; hoặc đặt biến `BENCH_BROWSER` là đường dẫn tới trình duyệt).
+- Không cần cài thư viện nào khác. Dung lượng: dưới 10 MB.
+
+## Điều khiển (mặc định, đổi được trong Cài đặt → Điều khiển)
 
 | Phím | Việc |
 |---|---|
@@ -37,6 +44,29 @@ Bot tự chơi để kiểm tra màn chơi thắng được: `npm run bot -- --n
 | `F` | Tỏa sáng: tốn 3 ánh sáng, làm choáng và đẩy lùi Bóng Mực trong 5 m |
 | Kéo chuột hoặc `Z` / `X` | Xoay camera |
 | `Esc` / `P` | Tạm dừng (Tiếp tục / Chơi lại đêm / Cài đặt / Về menu); `R` khi đang tạm dừng: chơi lại đêm |
+
+Đổi phím: Cài đặt → **Điều khiển (đổi phím)** cho cả 4 hướng đi, nhảy, lướt, tương tác, tỏa sáng, tạm dừng, xoay camera. Gán phím đang dùng thì có cảnh báo và không đổi; nút **Khôi phục mặc định**; phím được lưu lại (`localStorage`).
+
+![Đổi phím](docs/media/phase4-doi-phim.png)
+
+## Bảng xếp hạng, hỗ trợ tiếp cận
+
+- Sau khi **thắng Đêm 3 (Bình Minh)** hoặc **thua ở bất kỳ Đêm nào**, nhập tên (3–12 ký tự, chữ/số/`_`, có dấu tiếng Việt cũng được). Mỗi mục: `name`, `score` (tổng điểm các Đêm đã thắng), `nights_won` (0–3), `achieved_at` (ISO 8601 có múi giờ), `seed`. Top 10, điểm giảm dần, hòa thì ai trước xếp trước. Lưu vào `data/leaderboard.json` (đổi chỗ bằng biến `LEADERBOARD_FILE`) nên còn sau khi khởi động lại; menu chính có màn **Bảng xếp hạng**.
+- Xuất: `node scripts/serve.mjs --export-leaderboard out.json` → `{"entries":[...]}` đúng thứ tự.
+- Cài đặt có: **Giảm chuyển động** (không rung camera, không chớp màn hình, đèn yếu mờ thay vì nhấp nháy), **Chữ lớn ×1,25** (chữ UI tối thiểu 18 px ở 1280×720), **Bảng màu dễ phân biệt**, **Phụ đề và chỉ báo hình ảnh**: Bóng Mực xuất hiện (mũi tên ⚠ ở mép màn hình chỉ hướng + phụ đề), gió sắp nổi, 10 giây cuối, đèn dưới 30 dầu.
+
+![Bảng xếp hạng](docs/media/phase4-bang-xep-hang.png)
+
+## Benchmark và soak (Contract v1.3)
+
+```bash
+node scripts/bench.mjs --seed 42 --duration 30 --out bench.json   # mở Chrome/Edge thật, cảnh chuẩn 1280x720
+node scripts/soak.mjs  --seed 7  --nights 10 --out soak.json      # headless 10 Đêm trong một tiến trình
+```
+
+- `bench`: Đêm 1 đủ hiệu ứng, đúng 200 Bóng Mực (đi lang thang, rải đều theo seed), 100 đom đóm, 3 đèn sáng dầu 100; camera quay quanh gốc (bán kính 30 m, Y = 15, 15 s/vòng); 3 s khởi động rồi đo `--duration` s. Đầu ra: `contract_version`, `avg_fps`, `p1_low_fps`, `frame_ms_p95`, `frames`, `load_ms`, `peak_mem_mb` (`null` kèm giải thích trong `notes`: trình duyệt không cho trang đọc RSS), `vsync_off`, `renderer`, `os`. Số đo phụ thuộc máy; file `bench.json` kèm repo do chính tôi chạy trên máy của mình.
+- `soak`: 10 Đêm (1→2→3 luân phiên), Đêm i dùng seed 7+i (i = 0..9), đầu vào ngẫu nhiên đúng đặc tả. Đạt khi `crashes = 0` và `mem_end_mb ≤ 1,2 × mem_start_mb`.
+- Hình cảnh bench: `docs/media/phase4-bench-scene.png`.
 
 ## Luật chơi ngắn gọn
 
@@ -61,7 +91,7 @@ Bot tự chơi để kiểm tra màn chơi thắng được: `npm run bot -- --n
 | Thắng lúc bình minh: mỗi đèn sáng | +50 + dầu còn lại (làm tròn xuống) |
 | Thắng: mỗi Ngọn Lửa còn lại | +50 |
 
-Tổng điểm game = tổng điểm các Đêm đã thắng. Mọi con số nằm trong `game.contract.json` (mục `tuning`, số chuẩn của Ticket-02/03). Giả định: `docs/notes/assumptions-phase2.md`, `docs/notes/assumptions-phase3.md`. Spec: `docs/spec/phase-2.md`, `docs/spec/phase-3.md`. Quyết định thiết kế: `docs/adr/`. Thay đổi phá vỡ: `CHANGELOG.md`.
+Tổng điểm game = tổng điểm các Đêm đã thắng. Mọi con số nằm trong `game.contract.json` (mục `tuning`, số chuẩn của Ticket-02/03). Giả định: `docs/notes/assumptions-phase2.md` … `assumptions-phase4.md`. Spec: `docs/spec/phase-2.md` … `phase-4.md`. Quyết định thiết kế: `docs/adr/`. Thay đổi phá vỡ: `CHANGELOG.md`.
 
 Chế độ màu: Cài đặt → "Bảng màu dễ phân biệt" (viền/mắt Bóng Mực xanh #00B3FF, cảnh báo trắng kèm ⚠).
 
@@ -73,7 +103,7 @@ Chỉ là lớp hiển thị, **không đổi gì ở đầu ra headless**: lõi
 2. **Ánh sáng phản ánh những gì bạn làm.** Cầu đèn của Mây phình to và đèn tay sáng hơn theo lượng ánh sáng đang mang; đèn lồng chưa thắp sáng dần theo lượng đã nạp; thắp xong có vòng sáng và tia lửa tỏa ra. Cả đảo cũng ấm dần lên theo số đèn đã sáng.
 3. **Âm thanh tổng hợp bằng WebAudio**, không dùng file âm thanh nào: tiếng nhặt (cao dần theo số đang mang), nạp, giai điệu ba nốt khi thắp đèn, tiếng tỏa sáng, tiếng bị chạm.
 
-Bằng chứng phần cũ vẫn đúng: `tests/purity.test.mjs` (lõi không dùng `Math.random`, `Date`, DOM; không import ngược từ `web/`; `web/main.js` chỉ gọi `createGame`, `step`, `timeLeft`, `nightDuration`, `WORLD` và đọc dữ liệu bản đồ `NIGHTS`), cùng toàn bộ 105 test và `docs/proof/phase-1/determinism.txt` (hai lần chạy headless trùng hash).
+Bằng chứng phần cũ vẫn đúng: `tests/purity.test.mjs` (lõi không dùng `Math.random`, `Date`, DOM; không import ngược từ `web/`; `web/main.js` chỉ gọi `createGame`, `step`, `timeLeft`, `nightDuration`, `WORLD` và đọc dữ liệu bản đồ `NIGHTS`), cùng toàn bộ test (`npm test`) và `docs/proof/phase-1/determinism.txt` (hai lần chạy headless trùng hash).
 
 ## Cấu trúc
 
@@ -81,7 +111,8 @@ Bằng chứng phần cũ vẫn đúng: `tests/purity.test.mjs` (lõi không dù
 src/core/       lõi mô phỏng thuần, tất định (sim, maps = bản đồ 3 Đêm, rng, kiểm tra định dạng)
 src/headless/   CLI theo Test Contract
 web/            bản chơi 3D (Three.js) dùng chung src/core
-scripts/        serve, bot, evidence, tag-phase, stop-gate
+src/shared/     mô-đun bảng xếp hạng (ngoài lõi, dùng chung máy chủ và bản chơi)
+scripts/        serve, bot, bench, soak, evidence, tag-phase, stop-gate
 tests/          test theo Test Contract, tất định, bot, lõi thuần
 docs/           spec (tiêu chí chấp nhận từng phase), notes (giả định, AI log, retro), proof (bằng chứng từng phase), samples, media
 ```
@@ -93,3 +124,4 @@ docs/           spec (tiêu chí chấp nhận từng phase), notes (giả đị
 - `docs/notes/`: giả định (kèm nguyên văn Test Contract và ticket), nhật ký dùng AI, retro.
 - `docs/proof/`: bằng chứng từng phase, do `scripts/evidence.mjs` sinh ra.
 - `CREDITS.md`, `LICENSE` (MIT).
+

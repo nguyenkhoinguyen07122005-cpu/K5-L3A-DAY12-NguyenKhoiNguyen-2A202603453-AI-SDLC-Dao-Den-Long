@@ -7,7 +7,7 @@
 | 1 | Claude (claude.ai), model Claude Sonnet 5.5 | Không đo được số token chính xác (claude.ai chỉ hiển thị % quota, tính chung mọi cuộc trò chuyện). Ước tính: Phase 1 dùng 1 cuộc trò chuyện dài trên claude.ai (Claude Sonnet 5.5). Lúc 14:35 ngày 20/11/2026, Settings → Usage hiển thị: phiên hiện tại 20% đã dùng, tuần này 64% đã dùng | Lõi mô phỏng tất định + headless theo Test Contract (`src/core`, `src/headless`), 53 test, bot tự chơi, bản chơi 3D Three.js, tài liệu | Dán nguyên văn Test Contract một lần thay vì mô tả lại; làm lõi + test trước, đồ họa sau; chỉ một ý sáng tạo nhỏ (hiển thị), không thêm cơ chế |
 | 2 | Claude (claude.ai), model Claude Sonnet 5.5 | Ước tính, không đo được số token: trang Settings → Usage chỉ hiện %. Hạn mức tuần tăng từ 64% lên 67% (khoảng 3%) trong lúc làm Phase 2 (15:02 đến 15:37 ngày 20/11/2026); hạn mức phiên hiện tại hiện 43% (phiên bắt đầu 13:10, gồm cả cuối Phase 1). Số này có thể lẫn các chat khác cùng tài khoản. | Số chuẩn Ticket-02, 3 bản đồ (cầu, dốc, bục nhảy, tháp), lướt, rơi/hồi sinh, Gió Lạc, Bùa Gió, gió, tạm dừng; Contract v1.1; 34 test mới; chuỗi 3 Đêm, HUD, âm thanh, cài đặt | Dán nguyên văn ticket một lần; viết lõi + test trước, giao diện sau; bot tự chơi thay cho chơi tay để kiểm bản đồ; dùng Playwright đo FPS thay vì đoán |
 | 3 | Claude (claude.ai, Claude Sonnet 5.5) |Ước tính: ~3% hạn mức tuần gói Claude Pro (tuần từ 67% lên 70% theo Settings → Usage), phiên hiện tại 60% lúc 16:51. Claude không công bố số token, nên ghi theo phần trăm hạn mức. Một phần số này có thể gồm các chat khác trong cùng tuần.| Ticket-03: nhiên liệu đèn, Bóng Mực `drain`, thắng ở bình minh, sức chứa động, điểm mới, bảng màu dễ phân biệt; Contract v1.2; 18 test mới, sửa 9 test cũ có lý do; ADR + CHANGELOG | Dán nguyên văn ticket một lần; giữ nguyên thứ tự lõi → test → tài liệu → giao diện; bot tự chơi để đo cân bằng thay vì chơi tay |
-| 4 | | | | |
+| 4 | Claude (claude.ai, Claude Sonnet 5.5) |Ước tính theo % hạn mức gói Pro (Settings → Usage, không có số token chính xác): Phase 4 tốn ~11 điểm % phiên (60% → 71%) và ~2 điểm % hạn mức tuần (70% → 72%), chụp lúc 17:10 ngày 20/11/2026. Một phần số này có thể gồm các chat khác trong cùng tuần| Contract v1.3; bảng xếp hạng + xuất; soak; bench trong trình duyệt thật; đổi phím, phụ đề, giảm chuyển động, chữ lớn; đóng gói và tài liệu | Giữ thứ tự lõi → script → giao diện → tài liệu; dùng InstancedMesh thay vì tối ưu mò; kiểm giao diện bằng Playwright thay vì chơi tay |
 
 ## Lần AI sai
 
@@ -27,6 +27,9 @@
 | 3 | Bot cắt chéo khỏi cầu tre khi đổi mục tiêu giữa cầu (rơi, mất lửa) | Trace: `player_hit by fall` | Thêm luật: đang trên cầu thì đi hết cầu rồi mới rẽ |
 | 3 | Test nhặt đom đóm đặt 14 đom đóm cách nhau 0.1 m nên chỉ 11 cái nằm trong bán kính nhặt 1 m | Test đỏ (11 thay vì 14) | Đổi khoảng cách 0.05 m |
 | 3 | Kỳ vọng `fuel_drain` ở tick 60 và `fuel` 14.0, nhưng bóng vào `drain` sau bước trừ dầu của tick 1 | Test đỏ, đọc snapshot | Sửa kỳ vọng (61, 121; 59 tick hút) và ghi P3-5 |
-
+| 4 | Soak đầu đo RSS ngay khi vào, tỉ lệ 2,8× dù không rò rỉ | Chạy thật, so `mem_start`/`mem_end` | Khởi động tới khi RSS ổn định, ghi vào P4-3 |
+| 4 | Bench đầu vẽ ~1000 draw call (từng Bóng Mực một) nên rất chậm | Số khung hình/giây thấp khi đo trong môi trường phần mềm; sau khi đổi, chạy trên máy thật cho 331 FPS (`bench.json`) | Chuyển sang InstancedMesh |
+| 4 | Ô lưu xếp hạng ghi `seed` là số âm (ví dụ -1619520860) vì lấy seed ngẫu nhiên của trang dạng số có dấu; hợp lệ nhưng khó đọc và dễ gây hiểu nhầm khi người khác chạy lại | Playwright lưu thử một điểm rồi đọc `data/leaderboard.json` | Ép `>>> 0` để seed luôn không âm |
+| 4 | Nhãn nút "Tỏa sáng" bị xuống dòng khi bật chữ lớn ×1,25 (ô hồi chiêu quá hẹp) | Ảnh chụp Playwright ở chế độ chữ lớn | Nới rộng ô và đặt `white-space:nowrap` |
 
 

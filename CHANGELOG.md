@@ -2,6 +2,24 @@
 
 Định dạng theo [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Mục **PHÁ VỠ** là thay đổi khiến đầu ra headless hoặc hành vi cũ không còn đúng.
 
+## [1.0.0] - Phase 4 "Bình minh" (Contract v1.3, tag `phase-4`, Release `v1.0.0`)
+
+### Thay đổi hợp đồng (không phá vỡ)
+
+- `contract_version` = `"1.3"`; `game.contract.json` thêm `bench_cmd` (`node scripts/bench.mjs`) và `soak_cmd` (`node scripts/soak.mjs`). Mọi yêu cầu v1.0–v1.2 giữ nguyên; đầu ra headless không đổi so với 1.2.0.
+
+### Thêm
+
+- Benchmark `scripts/bench.mjs`: cảnh chuẩn 1280×720 (200 Bóng Mực, 100 đom đóm, 3 đèn, camera quay 15 s/vòng) chạy trong Chrome/Edge thật; ghi `bench.json`.
+- Soak `scripts/soak.mjs`: 10 Đêm headless trong một tiến trình, đầu vào ngẫu nhiên; ghi `soak.json`.
+- Bảng xếp hạng cục bộ (top 10, lưu đĩa, màn hình trong menu, nhập tên sau khi thắng Đêm 3 hoặc thua), `--export-leaderboard`.
+- Hỗ trợ tiếp cận: đổi phím có phát hiện trùng và nút khôi phục, phụ đề và chỉ báo hình ảnh, giảm chuyển động, chữ ≥ 18 px và tùy chọn chữ lớn ×1,25.
+- Đóng gói: README đầy đủ, CREDITS, LICENSE, bản phát hành chạy được.
+
+### Sửa
+
+- `peak_mem_mb` của bench là `null` kèm giải thích thay vì số bịa (trình duyệt không cho đọc RSS).
+
 ## [1.2.0] - Phase 3 "Đèn cạn dầu" (Contract v1.2, tag `phase-3`)
 
 ### PHÁ VỠ (breaking changes)

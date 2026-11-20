@@ -65,3 +65,16 @@ Bằng chứng sinh tự động trong `docs/proof/phase-3/`: `test-output.txt`,
 | Test cũ bị luật mới làm sai được sửa/xóa có lý do | Bảng trong `CHANGELOG.md` và `assumptions-phase3.md` | — | Đạt |
 | Màn chơi thắng được | Bot: Đêm 1 thắng có Bóng Mực; Đêm 2 thắng khi tắt Bóng Mực; Đêm 3 thắng với `successful_lights:3` | `[winnable]`, `phase-3/bot-output.txt` | Đạt một phần: bot Đêm 3 chơi thường chưa thắng (P3-9) |
 | Giao diện: thanh dầu, nhấp nháy, đèn tắt bẹp, HUD sức chứa, bảng màu dễ phân biệt | Ảnh chụp Chrome headless + chơi tay | `docs/proof/phase-3/*.png` | Đạt (không có test tự động chặt, như Phase 1) |
+
+## Phase 4
+
+Bằng chứng sinh tự động trong `docs/proof/phase-4/` (`node scripts/evidence.mjs 4`). Ngoài ra: `bench.json` và `soak.json` ở gốc repo do chính người nộp chạy trên máy của mình.
+
+| Yêu cầu (Ticket-04 / Contract v1.3) | Cách kiểm | Nhãn test / file bằng chứng | Kết quả |
+|---|---|---|---|
+| Contract v1.3 (`bench_cmd`, `soak_cmd`) | Đọc `game.contract.json` | `[AC-90]` | Đạt |
+| Bảng xếp hạng: định dạng, thứ tự, top 10, lưu đĩa, xuất | Chạy CLI và máy chủ thật | `[AC-91]`…`[AC-93]` | Đạt |
+| Soak 10 Đêm | Chạy `soak.mjs`; test bản 4 Đêm | `[AC-94]`, `soak.json` | Đạt (xem `soak.json`) |
+| Bench 200 Bóng Mực + 100 đom đóm | Chạy `bench.mjs` bằng Chrome | `bench.json` | Số đo do người nộp chạy; ngưỡng 60/30 FPS, 10 s tải |
+| Đổi phím, phụ đề, giảm chuyển động, chữ lớn | Chơi thử Playwright + ảnh | `docs/media/phase4-*.png` | Đạt (không có test tự động chặt cho giao diện) |
+| Test Phase 1–3 vẫn đạt | `npm test` | `phase-4/test-output.txt` | Đạt |
