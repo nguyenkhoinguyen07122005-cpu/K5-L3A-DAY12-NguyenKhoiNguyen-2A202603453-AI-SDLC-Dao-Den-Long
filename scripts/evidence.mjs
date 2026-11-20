@@ -4,7 +4,7 @@
 // Khong sua tay file sinh ra; chay lai moi lan chot phase (truoc khi gan tag).
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 
 const phase = process.argv[2];
@@ -62,7 +62,7 @@ if (existsSync("docs/samples/scenario.example.json")) {
     `${stamp}lenh: node src/headless/cli.mjs --seed 42 --night 1 --ticks 3000 --scenario docs/samples/scenario.example.json --inputs docs/samples/inputs.example.json --out sample-run.jsonl (chay 2 lan)\n` +
       `exit code lan 1: ${a.status}\nsha256 lan 1: ${h1}\nsha256 lan 2: ${h2}\ngiong het: ${h1 === h2}\nso dong output: ${lines.length}\ndong cuoi: ${lines.at(-1)}\n`,
   );
-  sh("node", ["-e", `require("fs").rmSync("${dir}/.tmp-second.jsonl",{force:true})`]);
+  rmSync(`${dir}/.tmp-second.jsonl`, { force: true }); // khong qua shell: chay dung tren Windows
   console.log(`Da ghi ${dir}/determinism.txt va sample-run.jsonl (giong het: ${h1 === h2})`);
   if (h1 !== h2) process.exit(1);
 }
