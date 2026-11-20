@@ -50,4 +50,18 @@ Ghi chú trung thực: bot ngây thơ chỉ thắng được Đêm 1 (≥ 4/20 s
 
 ## Phase 3
 
-## Phase 4
+Bằng chứng sinh tự động trong `docs/proof/phase-3/`: `test-output.txt`, `bot-output.txt` (bot sống tới bình minh; Đêm 1 có Bóng Mực, Đêm 2 và 3 có chế độ `--calm`, Đêm 3 thêm `--sl 3`), `determinism.txt` + `sample-run.jsonl`, `perf-fullnight.txt`. Spec: `docs/spec/phase-3.md`. ADR: `docs/adr/0001-trang-thai-den-va-luat-thang.md`. Thay đổi phá vỡ và test đã sửa/xóa kèm lý do: `CHANGELOG.md`. Giả định: `docs/notes/assumptions-phase3.md`.
+
+| Yêu cầu (Ticket-03 / Contract v1.2) | Cách kiểm | Nhãn test / file bằng chứng | Kết quả |
+|---|---|---|---|
+| Contract v1.2, tuning mới, bỏ thưởng giây | Đọc `game.contract.json` | `[AC-70]`, `[contract]` | Đạt |
+| Nhiên liệu: hao 1/s, cạn thì tắt (`lantern_out`), thắp lại 5, châm +10/đom đóm | Chạy CLI thật, quét snapshot | `[AC-71]`…`[AC-76]` | Đạt |
+| Bóng Mực `drain`: chọn đèn yếu, đứng yên hút 5/s cộng dồn, chuyển trạng thái, +15 điểm | Chạy CLI thật | `[AC-77]`…`[AC-79]` | Đạt |
+| Đèn yếu (fuel < 30) mất vùng an toàn; châm lên đẩy bóng ra | Vị trí bóng theo tick | `[AC-80]`, `[AC-81]` | Đạt |
+| Sức chứa động 10→20 | Snapshot, nhặt đom đóm | `[AC-82]`, `[AC-83]` | Đạt |
+| Thắng chỉ ở bình minh với ≥ 60% đèn; `dawn`, `no_flames`; điểm mới | 3 Đêm, ca biên 1 s | `[AC-33]`, `[AC-84]`, `[game_over won]` | Đạt |
+| Scenario v1.2 sai định dạng → mã thoát 2; tất định | CLI | `[AC-85]`, `[AC-86]`, `phase-3/determinism.txt` | Đạt |
+| Test Phase 1–2 không bị luật mới thay thế vẫn đạt | `npm test` toàn bộ | 105/105 trong `phase-3/test-output.txt` | Đạt |
+| Test cũ bị luật mới làm sai được sửa/xóa có lý do | Bảng trong `CHANGELOG.md` và `assumptions-phase3.md` | — | Đạt |
+| Màn chơi thắng được | Bot: Đêm 1 thắng có Bóng Mực; Đêm 2 thắng khi tắt Bóng Mực; Đêm 3 thắng với `successful_lights:3` | `[winnable]`, `phase-3/bot-output.txt` | Đạt một phần: bot Đêm 3 chơi thường chưa thắng (P3-9) |
+| Giao diện: thanh dầu, nhấp nháy, đèn tắt bẹp, HUD sức chứa, bảng màu dễ phân biệt | Ảnh chụp Chrome headless + chơi tay | `docs/proof/phase-3/*.png` | Đạt (không có test tự động chặt, như Phase 1) |

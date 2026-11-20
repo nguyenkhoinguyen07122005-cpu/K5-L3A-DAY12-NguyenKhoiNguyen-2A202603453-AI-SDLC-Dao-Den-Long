@@ -1,6 +1,6 @@
 # AGENTS.md - Dao Den Long
 
-Game 3D goc nhin thu ba, 3 Dem (Dao Ben, Dao Cau, Dao Chuong). Logic game la module thuan (khong phu thuoc do hoa) de chay headless theo Test Contract v1.1.
+Game 3D goc nhin thu ba, 3 Dem (Dao Ben, Dao Cau, Dao Chuong). Logic game la module thuan (khong phu thuoc do hoa) de chay headless theo Test Contract v1.2 (Phase 3: nhien lieu den, Bong Muc drain, thang o binh minh; xem docs/adr/0001-trang-thai-den-va-luat-thang.md).
 
 ## Lenh
 - Test: `npm test` (Node >= 20)
@@ -16,6 +16,7 @@ Game 3D goc nhin thu ba, 3 Dem (Dao Ben, Dao Cau, Dao Chuong). Logic game la mod
 - `src/headless/cli.mjs`: CLI. `web/main.js`: ban 3D + menu/HUD/am thanh, chi goi `createGame`, `step`, `timeLeft`, `nightDuration`, `WORLD` va doc `NIGHTS`.
 - Thu tu xu ly trong mot tick: xem `step()` (danh so 1-11 theo Ticket-02) va muc P2-x trong `docs/notes/assumptions-phase2.md`.
 - Spec va tieu chi chap nhan (AC-xx) cua Phase 2: `docs/spec/phase-2.md`; test mang nhan `[AC-xx]` trong `tests/v11.test.mjs`.
+- Phase 3: `docs/spec/phase-3.md` (AC-70..AC-87), test trong `tests/v12.test.mjs`, thay doi pha vo trong `CHANGELOG.md`, gia dinh trong `docs/notes/assumptions-phase3.md`. Khong con ly do `all_lit`; thang chi o tick binh minh (`dawn_survived`).
 
 ## Quy uoc
 - `src/core/` = logic thuan, tat dinh: cam `Math.random()`, `Date.now()`, doc file/mang. Ngau nhien chi qua `createRng(seed)`.

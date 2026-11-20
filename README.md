@@ -13,17 +13,17 @@ Ba Đêm: **Đảo Bến** (đảo tròn), **Đảo Cau** (hai đảo nối bằ
 ```bash
 npm install      # không có thư viện ngoài (Three.js đã kèm trong web/vendor), lệnh này chạy gần như tức thì
 npm run play     # mở http://localhost:8080 trên trình duyệt (đổi cổng: PORT=9000 npm run play)
-npm test         # 87 test: Test Contract v1.1, tất định, bot thắng được, lõi thuần
+npm test         # 105 test: Test Contract v1.2, tất định, bot thắng được, lõi thuần
 ```
 
-Chế độ headless (theo Test Contract v1.1, không cần cửa sổ/GPU; `--night` nhận 1, 2, 3):
+Chế độ headless (theo Test Contract v1.2, không cần cửa sổ/GPU; `--night` nhận 1, 2, 3):
 
 ```bash
 node src/headless/cli.mjs --seed 42 --night 2 --ticks 3000 --out out.jsonl \
   --scenario docs/samples/scenario.example.json --inputs docs/samples/inputs.example.json
 ```
 
-Bot tự chơi để kiểm tra màn chơi thắng được: `npm run bot -- --night 1` (đứng yên thì thua; thêm `--calm` để tắt kẻ địch và chứng minh mọi đèn trên Đêm 2/3 đều tới được).
+Bot tự chơi để kiểm tra màn chơi thắng được: `npm run bot -- --night 1` (đứng yên thì thua; thêm `--calm` để tắt kẻ địch và chứng minh mọi đèn trên Đêm 2/3 đều tới được; `--sl 3` khởi đầu với sức chứa 16, dùng cho Đêm 3).
 Địa chỉ tiện cho người chấm: `http://localhost:8080/web/index.html?autostart&night=3&fps` (vào thẳng Đêm 3, hiện FPS).
 
 ## Điều khiển
@@ -41,9 +41,10 @@ Bot tự chơi để kiểm tra màn chơi thắng được: `npm run bot -- --n
 ## Luật chơi ngắn gọn
 
 - Chuỗi: Menu chính → giới thiệu Đêm (lời Ông Đăng) → chơi → kết quả → Đêm kế. Thắng Đêm 3 là Bình Minh với tổng điểm. Thua thì chơi lại đúng Đêm đó.
-- Mỗi Đêm có thời gian 300 / 330 / 360 giây và 5 / 6 / 7 đèn. Thắp đủ đèn trước bình minh để thắng. Ngọn Lửa (mạng): 3, đầy lại mỗi Đêm.
-- Đi sát đom đóm là tự nhặt (mang tối đa 10). Mỗi đèn cần **10** ánh sáng, nạp bằng `E` (nạp dần được, đèn nhớ tiến độ).
-- Bóng Mực phát hiện trong 12 m, đuổi 4 m/s (Đêm 3: 4,5). Chạm: mất 1 Ngọn Lửa, rơi nửa số ánh sáng đang mang, bất tử 1,5 s. Quanh mỗi đèn đã thắp có vòng an toàn 6 m.
+- Mỗi Đêm có thời gian 240 / 270 / 300 giây và 5 / 6 / 7 đèn. **Thắng = sống tới bình minh với ít nhất 60% đèn còn sáng** (3/5, 4/6, 5/7); thắp đủ đèn không kết thúc đêm. Ngọn Lửa (mạng): 3, đầy lại mỗi Đêm.
+- Đi sát đom đóm là tự nhặt. Sức chứa = 10 + 2 mỗi lần thắp thành công, tối đa 20. Đèn cần **10** ánh sáng để thắp lần đầu (**5** để thắp lại), nạp bằng `E` (nạp dần được, đèn nhớ tiến độ).
+- **Nhiên liệu đèn**: đầy 100, hao 1/giây, cạn thì tắt. Bấm `E` bên đèn đang sáng để châm (+10 mỗi ánh sáng). Đèn dưới 30 dầu nhấp nháy, mất vòng an toàn và bị Bóng Mực tới **hút dầu** (5/giây mỗi con); đẩy lùi chúng bằng Tỏa Sáng (+15 điểm).
+- Bóng Mực phát hiện trong 12 m, đuổi 4 m/s (Đêm 3: 4,5). Chạm: mất 1 Ngọn Lửa, rơi nửa số ánh sáng đang mang, bất tử 1,5 s. Quanh mỗi đèn đủ dầu (≥ 30) có vòng an toàn 6 m.
 - **Gió Lạc** (Đêm 2, 3) cuỗm 3 ánh sáng nếu bạn mang ≥ 5; Tỏa Sáng vào nó thì nó bỏ chạy (nếu đang mang đồ cướp thì thả lại).
 - **Bùa Gió** (khăn đỏ): 10 s chạy 7,2 m/s và lướt không hồi chiêu.
 - **Bục nhảy** bắn bạn sang đảo kia (Đêm 2) hoặc lên đỉnh tháp (Đêm 3). **Gió mạnh** ở Đêm 3 mỗi 30 s, báo trước 2 s bằng lá bay.
@@ -53,13 +54,16 @@ Bot tự chơi để kiểm tra màn chơi thắng được: `npm run bot -- --n
 
 | Sự kiện | Điểm |
 |---|---|
-| Nạp 1 đom đóm vào đèn | +10 |
-| Thắp sáng 1 đèn | +100 |
-| Tỏa Sáng trúng 1 Bóng Mực | +5 |
-| Thắng: mỗi giây còn lại | +2 |
+| Nạp 1 đom đóm (thắp, thắp lại hoặc châm dầu) | +5 |
+| Thắp sáng lần đầu | +100 |
+| Thắp lại | +40 |
+| Tỏa Sáng trúng 1 Bóng Mực (đang hút dầu: +15) | +5 |
+| Thắng lúc bình minh: mỗi đèn sáng | +50 + dầu còn lại (làm tròn xuống) |
 | Thắng: mỗi Ngọn Lửa còn lại | +50 |
 
-Tổng điểm game = tổng điểm các Đêm đã thắng. Mọi con số nằm trong `game.contract.json` (mục `tuning`, số chuẩn của Ticket-02). Giả định và chỗ tôi đổi so với Phase 1: `docs/notes/assumptions-phase2.md`. Spec và tiêu chí chấp nhận: `docs/spec/phase-2.md`.
+Tổng điểm game = tổng điểm các Đêm đã thắng. Mọi con số nằm trong `game.contract.json` (mục `tuning`, số chuẩn của Ticket-02/03). Giả định: `docs/notes/assumptions-phase2.md`, `docs/notes/assumptions-phase3.md`. Spec: `docs/spec/phase-2.md`, `docs/spec/phase-3.md`. Quyết định thiết kế: `docs/adr/`. Thay đổi phá vỡ: `CHANGELOG.md`.
+
+Chế độ màu: Cài đặt → "Bảng màu dễ phân biệt" (viền/mắt Bóng Mực xanh #00B3FF, cảnh báo trắng kèm ⚠).
 
 ## Sáng tạo của tôi
 
@@ -69,7 +73,7 @@ Chỉ là lớp hiển thị, **không đổi gì ở đầu ra headless**: lõi
 2. **Ánh sáng phản ánh những gì bạn làm.** Cầu đèn của Mây phình to và đèn tay sáng hơn theo lượng ánh sáng đang mang; đèn lồng chưa thắp sáng dần theo lượng đã nạp; thắp xong có vòng sáng và tia lửa tỏa ra. Cả đảo cũng ấm dần lên theo số đèn đã sáng.
 3. **Âm thanh tổng hợp bằng WebAudio**, không dùng file âm thanh nào: tiếng nhặt (cao dần theo số đang mang), nạp, giai điệu ba nốt khi thắp đèn, tiếng tỏa sáng, tiếng bị chạm.
 
-Bằng chứng phần cũ vẫn đúng: `tests/purity.test.mjs` (lõi không dùng `Math.random`, `Date`, DOM; không import ngược từ `web/`; `web/main.js` chỉ gọi `createGame`, `step`, `timeLeft`, `nightDuration`, `WORLD` và đọc dữ liệu bản đồ `NIGHTS`), cùng toàn bộ 87 test và `docs/proof/phase-1/determinism.txt` (hai lần chạy headless trùng hash).
+Bằng chứng phần cũ vẫn đúng: `tests/purity.test.mjs` (lõi không dùng `Math.random`, `Date`, DOM; không import ngược từ `web/`; `web/main.js` chỉ gọi `createGame`, `step`, `timeLeft`, `nightDuration`, `WORLD` và đọc dữ liệu bản đồ `NIGHTS`), cùng toàn bộ 105 test và `docs/proof/phase-1/determinism.txt` (hai lần chạy headless trùng hash).
 
 ## Cấu trúc
 
