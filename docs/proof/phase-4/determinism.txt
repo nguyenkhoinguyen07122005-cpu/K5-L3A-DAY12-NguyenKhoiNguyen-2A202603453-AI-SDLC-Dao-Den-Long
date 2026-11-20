@@ -1,5 +1,5 @@
-commit: 8f31c53eedcb7a9ce65e7ede863c132c6ec18c34 (+ thay doi chua commit)
-thoi gian (UTC): 2026-11-20T10:20:21.653Z
+commit: 4bed56fff106eda894fdf951c5ff351cd50b61c0
+thoi gian (UTC): 2026-11-20T15:44:50.027Z
 lenh: node src/headless/cli.mjs --seed 42 --night 1 --ticks 3000 --scenario docs/samples/scenario.example.json --inputs docs/samples/inputs.example.json --out sample-run.jsonl (chay 2 lan)
 exit code lan 1: 0
 sha256 lan 1: d00e24a7becd56eb94add046a0a2de85665168add9c0b4a264c81c9b827b5249
