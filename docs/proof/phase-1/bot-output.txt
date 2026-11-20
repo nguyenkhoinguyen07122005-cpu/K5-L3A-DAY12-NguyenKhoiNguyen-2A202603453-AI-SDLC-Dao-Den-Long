@@ -1,0 +1,34 @@
+commit: 1b8b527b11c7c98293ca859e50eb71d362b8fe30
+thoi gian (UTC): 2026-11-20T07:36:38.890Z
+lenh: node scripts/bot.mjs --seeds 20 --mode good
+---
+seed   1: won  all_lit     90.6s  diem  1503  mau 1  den 5/5
+seed   2: lost no_flames  110.8s  diem  1530  mau 0  den 4/5
+seed   3: won  all_lit     71.3s  diem  1621  mau 2  den 5/5
+seed   4: won  all_lit     81.7s  diem  1806  mau 2  den 5/5
+seed   5: won  all_lit    102.2s  diem  1904  mau 2  den 5/5
+seed   6: won  all_lit    101.9s  diem  1721  mau 3  den 5/5
+seed   7: won  all_lit    101.3s  diem  1691  mau 2  den 5/5
+seed   8: won  all_lit     94.6s  diem  1650  mau 3  den 5/5
+seed   9: lost no_flames   46.4s  diem   860  mau 0  den 1/5
+seed  10: won  all_lit     68.8s  diem  1477  mau 3  den 5/5
+seed  11: won  all_lit    109.5s  diem  1960  mau 2  den 5/5
+seed  12: won  all_lit    150.3s  diem  2563  mau 2  den 5/5
+seed  13: won  all_lit     85.8s  diem  1628  mau 2  den 5/5
+seed  14: won  all_lit    113.8s  diem  2007  mau 2  den 5/5
+seed  15: won  all_lit    170.8s  diem  2933  mau 2  den 5/5
+seed  16: won  all_lit    116.0s  diem  2246  mau 3  den 5/5
+seed  17: lost no_flames  109.3s  diem  1595  mau 0  den 3/5
+seed  18: lost no_flames  105.6s  diem  1310  mau 0  den 4/5
+seed  19: won  all_lit     86.2s  diem  1776  mau 2  den 5/5
+seed  20: lost no_flames   67.9s  diem  1020  mau 0  den 3/5
+
+che do good: thang 15/20
+
+lenh: node scripts/bot.mjs --seeds 3 --mode idle
+---
+seed   1: lost no_flames   11.7s  diem     0  mau 0  den 0/5
+seed   2: lost no_flames   13.1s  diem     0  mau 0  den 0/5
+seed   3: lost no_flames   11.8s  diem     0  mau 0  den 0/5
+
+che do idle: thang 0/3
