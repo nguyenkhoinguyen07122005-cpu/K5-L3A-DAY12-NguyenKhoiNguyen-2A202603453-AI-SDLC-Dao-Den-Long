@@ -1,8 +1,8 @@
-// Kiem tra dinh dang file inputs / scenario theo Test Contract v1.1.
+// Kiem tra dinh dang file inputs / scenario theo Test Contract v1.2.
 // Moi ham nem FormatError neu sai; CLI doi thanh ma thoat 2.
 export class FormatError extends Error {}
 
-export const SHADE_STATES = ["spawning", "wander", "chase", "recoil", "stunned"];
+export const SHADE_STATES = ["spawning", "wander", "chase", "recoil", "stunned", "drain"];
 export const DRIFTER_STATES = ["idle", "chase", "flee"];
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -44,7 +44,7 @@ export function validateScenario(doc, lanternIds) {
     if (doc.player.pos !== undefined) vec3(doc.player.pos, "scenario.player.pos");
     if (doc.player.carried !== undefined) nonNegInt(doc.player.carried, "scenario.player.carried");
     if (doc.player.flames !== undefined) nonNegInt(doc.player.flames, "scenario.player.flames");
-    for (const k of ["invuln_ticks", "dash_cd_ticks", "pulse_cd_ticks", "charm_ticks"]) {
+    for (const k of ["invuln_ticks", "dash_cd_ticks", "pulse_cd_ticks", "charm_ticks", "successful_lights"]) {
       if (doc.player[k] !== undefined) nonNegInt(doc.player[k], `scenario.player.${k}`);
     }
   }
@@ -63,6 +63,7 @@ export function validateScenario(doc, lanternIds) {
       if (s.id !== undefined && typeof s.id !== "string") fail(`scenario.shades[${i}].id: can chuoi`);
       if (s.state !== undefined && !SHADE_STATES.includes(s.state)) fail(`scenario.shades[${i}].state: mot trong ${SHADE_STATES.join(", ")}`);
       if (s.state_ticks_left !== undefined) nonNegInt(s.state_ticks_left, `scenario.shades[${i}].state_ticks_left`);
+      if (s.target_lantern_id !== undefined && !lanternIds.includes(s.target_lantern_id)) fail(`scenario.shades[${i}].target_lantern_id: '${s.target_lantern_id}' khong co (hop le: ${lanternIds.join(", ")})`);
     });
   }
   if (doc.drifters !== undefined) {
@@ -95,6 +96,9 @@ export function validateScenario(doc, lanternIds) {
       if (l.pos !== undefined) vec3(l.pos, `${w}.pos`);
       if (l.deposited !== undefined) nonNegInt(l.deposited, `${w}.deposited`);
       if (l.lit !== undefined && typeof l.lit !== "boolean") fail(`${w}.lit: can true/false`);
+      if (l.fuel !== undefined && (!isNum(l.fuel) || l.fuel < 0)) fail(`${w}.fuel: can so >= 0`);
+      if (l.ever_lit !== undefined && typeof l.ever_lit !== "boolean") fail(`${w}.ever_lit: can true/false`);
+      if (l.relit_count !== undefined) nonNegInt(l.relit_count, `${w}.relit_count`);
     });
   }
   if (doc.time_left_s !== undefined && (!isNum(doc.time_left_s) || doc.time_left_s < 0)) {

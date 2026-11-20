@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Che do headless theo Test Contract v1.1.
+// Che do headless theo Test Contract v1.2.
 //   node src/headless/cli.mjs --seed <int> --night 1|2|3 [--scenario f.json] [--inputs f.json]
 //        --ticks <int> --out f.jsonl [--snapshot-every <int>=10]
 // Ma thoat: 0 = ok; 2 = file inputs/scenario sai dinh dang; khac 0 = loi khac (stderr co thong bao).

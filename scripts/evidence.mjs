@@ -47,8 +47,12 @@ if (existsSync("scripts/bot.mjs")) {
     const idle = sh("node", ["scripts/bot.mjs", "--night", String(n), "--seeds", "3", "--mode", "idle"]);
     text += `lenh: node scripts/bot.mjs --night ${n} --seeds 20 --mode good\n---\n${bot.stdout}\nlenh: node scripts/bot.mjs --night ${n} --seeds 3 --mode idle\n---\n${idle.stdout}\n`;
     if (n >= 2) {
-      const calm = sh("node", ["scripts/bot.mjs", "--night", String(n), "--seeds", "6", "--mode", "good", "--calm"]);
-      text += `lenh: node scripts/bot.mjs --night ${n} --seeds 6 --mode good --calm (tat Bong Muc/Gio Lac: chung minh moi den toi duoc)\n---\n${calm.stdout}\n`;
+      const calm = sh("node", ["scripts/bot.mjs", "--night", String(n), "--seeds", "10", "--mode", "good", "--calm"]);
+      text += `lenh: node scripts/bot.mjs --night ${n} --seeds 10 --mode good --calm (tat Bong Muc/Gio Lac: chung minh moi den toi duoc)\n---\n${calm.stdout}\n`;
+      if (n === 3 && Number(phase) >= 3) {
+        const sl = sh("node", ["scripts/bot.mjs", "--night", "3", "--seeds", "10", "--mode", "good", "--calm", "--sl", "3"]);
+        text += `lenh: node scripts/bot.mjs --night 3 --seeds 10 --mode good --calm --sl 3 (suc chua 16, xem P3-9)\n---\n${sl.stdout}\n`;
+      }
     }
   }
   writeFileSync(`${dir}/bot-output.txt`, `${stamp}${text}`);

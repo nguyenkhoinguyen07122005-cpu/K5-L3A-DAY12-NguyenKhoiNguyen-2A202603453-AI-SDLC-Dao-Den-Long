@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Bot tu choi 3 Dem bang loi mo phong that - bang chung man choi THANG DUOC.
 // --calm: tat Bong Muc/Gio Lac de chung minh moi den tren moi dao DEU toi duoc (cau, doc, buc nhay).
-// Dung: node scripts/bot.mjs [--night 1|2|3] [--seeds 20] [--calm] [--mode good|idle]
-//   good: nhat dom dom, thap den gan nhat, toa sang khi Bong Muc den gan.
+// Dung: node scripts/bot.mjs [--night 1|2|3] [--seeds 20] [--calm] [--sl N] [--mode good|idle]
+//   good: nhat dom dom, thap/tiep dau cho den, toa sang khi Bong Muc den gan, song toi binh minh (v1.2).
 //   idle: dung yen (phai THUA - chung minh game khong tu thang).
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -27,12 +27,16 @@ function nearest(list, from, pred = () => true) {
   return best;
 }
 
+const LAZY_BY_NIGHT = { 1: 140, 2: 90, 3: 90 }; // giay con lai khi bot bat dau thap den (den chay ~100 s)
 const level = (y) => (y > 4.5 ? 2 : y > 1.5 ? 1 : 0);
 
 /** Diem trung gian de toi `target`: cau tre (Dem 2), doc/bục nhay (Dem 3). Tra ve toa do can huong toi truoc. */
 function waypoint(g, from, target) {
   if (g.night === 2) {
     const side = (p) => (p[0] < 35 ? 0 : 1);
+    const onB = (p) => p[0] >= 24 && p[0] <= 46 && Math.abs(p[2]) < 3;
+    // dang tren cau ma dich khong nam tren cau: di het cau ve phia dich truoc (khong cat cheo roi xuong vuc)
+    if (onB(from) && !onB(target)) return side(target) === 0 ? [23, 0, 0] : [47, 0, 0];
     if (side(from) !== side(target)) {
       const onBridge = from[0] >= 24 && from[0] <= 46 && Math.abs(from[2]) < 3;
       if (!onBridge) return side(from) === 0 ? [24, 0, 0] : [46, 0, 0];
@@ -69,9 +73,29 @@ export function botInput(g, tick) {
     return [dx / d, dz / d];
   };
   const sameLevel = (o) => Math.abs(o.pos[1] - P.pos[1]) < 1.5;
-  const lantern = nearest(g.lanterns, P.pos, (l) => !l.lit);
-  const needs = lantern ? tuning.lantern_cost - lantern.deposited : 0;
-  const carryingEnough = P.carried >= Math.min(needs, tuning.carry_capacity) && P.carried > 0;
+  // v1.2: muc tieu = giu du den sang toi binh minh. Uu tien den chua tung sang, roi den tat, roi den sap het dau.
+  const cap = P.capacity ?? tuning.carry_capacity;
+  const costOf = (l) => (l.everLit ? tuning.relight_cost : tuning.lantern_cost) - l.deposited;
+  const needOf = (l) => (l.lit ? Math.ceil((tuning.fuel_max * 60 - l.fuelU) / 60 / tuning.fuel_per_mote - 1e-9) : costOf(l));
+  // Kinh te: moi den sang ton 1 dom dom / 10 giay. Chi can >= win_ratio den sang LUC BINH MINH, nen:
+  // (1) den sang sap het dau chi duoc tiep khi dang o muc toi thieu; (2) thap/thap lai cho toi khi du den + 1 du phong; (3) con du thi tiep dau.
+  const total = g.lanterns.length;
+  const need = Math.ceil(tuning.win_ratio * total - 1e-9);
+  const litCount = g.lanterns.filter((l) => l.lit).length;
+  const lazy = (tuning.night1_duration_s * 0 + (g.t0 - g.simTick / 60)) > (Number(process.env.LAZY) || LAZY_BY_NIGHT[g.night]); // chua toi luc: chi nhat dom dom
+  const wantList = lazy ? [] : g.lanterns.filter((l) => {
+    if (!l.lit) return litCount < need;
+    return l.fuelU / 60 < (litCount <= need ? 45 : 25);
+  });
+  let lantern = null;
+  let bs = Infinity;
+  for (const l of wantList) {
+    const rank = l.lit ? (l.fuelU / 60 < 15 ? 0 : 2) : !l.everLit ? 1 : 1;
+    const sc = rank * 1000 + (l.lit ? (l.fuelU / 60) * 4 : 0) + d2(P.pos, l.pos);
+    if (sc < bs) (bs = sc), (lantern = l);
+  }
+  const needs = lantern ? Math.min(needOf(lantern), cap) : 0;
+  const carryingEnough = lantern && P.carried >= Math.max(1, lantern.lit ? Math.min(needs, 6) : needs);
   let target;
   if (carryingEnough && lantern) target = lantern.pos;
   else {
@@ -89,7 +113,7 @@ export function botInput(g, tick) {
   let rz = 0;
   let closest = Infinity;
   for (const sh of g.shades) {
-    if (sh.state !== "chase" && sh.state !== "wander") continue;
+    if (sh.state === "stunned" || sh.state === "recoil" || sh.state === "spawning") continue;
     const d = d2(P.pos, sh.pos);
     closest = Math.min(closest, d);
     if (d < 8) {
@@ -117,7 +141,7 @@ export function playBot(seed, mode = "good", night = 1, scenario = {}) {
   for (let k = 0; k < maxTicks && g.state === "playing"; k++) {
     step(g, mode === "idle" ? { move: [0, 0], camYawDeg: 0 } : botInput(g, k));
   }
-  return { seed, state: g.state, reason: g.result?.reason, ticks: g.tick, score: g.score, flames: g.player.flames, lit: g.lanterns.filter((l) => l.lit).length, total: g.lanterns.length };
+  return { seed, state: g.state, reason: g.result?.reason, ticks: g.tick, score: g.score, flames: g.player.flames, lit: g.lanterns.filter((l) => l.lit).length, total: g.lanterns.length, need: Math.ceil(tuning.win_ratio * g.lanterns.length - 1e-9) };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -126,7 +150,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const n = Number(get("--seeds", 20));
   const mode = get("--mode", "good");
   const night = Number(get("--night", 1));
-  const scenario = args.includes("--calm") ? { random_shades: false, random_drifters: false } : {};
+  const sl = Number(get("--sl", 0)); // successful_lights khoi dau (chung minh Dem 3 kha thi, xem P3-9)
+  const scenario = { ...(args.includes("--calm") ? { random_shades: false, random_drifters: false } : {}), ...(sl ? { player: { successful_lights: sl } } : {}) };
   let wins = 0;
   for (let seed = 1; seed <= n; seed++) {
     const r = playBot(seed, mode, night, scenario);
