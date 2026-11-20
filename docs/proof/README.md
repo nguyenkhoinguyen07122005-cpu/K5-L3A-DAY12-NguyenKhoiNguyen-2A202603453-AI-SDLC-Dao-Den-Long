@@ -28,6 +28,26 @@ Ghi chú trung thực: phần hiển thị 3D (hình ảnh, HUD, âm thanh) khô
 
 ## Phase 2
 
+Bằng chứng sinh tự động trong `docs/proof/phase-2/`: `test-output.txt` (toàn bộ `npm test`), `bot-output.txt` (bot tự chơi 20 seed trên mỗi Đêm + đối chứng đứng yên + chế độ `--calm` cho Đêm 2/3), `determinism.txt` + `sample-run.jsonl`, `perf-fullnight.txt` (mỗi Đêm chạy đủ 21 600 tick headless, thời gian và băm hai lần chạy). Spec và tiêu chí: `docs/spec/phase-2.md`. Giả định/thay đổi: `docs/notes/assumptions-phase2.md`.
+
+| Yêu cầu (Ticket-02 / Contract v1.1) | Cách kiểm | Nhãn test / file bằng chứng | Kết quả |
+|---|---|---|---|
+| Số chuẩn thay mọi số tự chọn; contract v1.1 | Đọc `game.contract.json` qua test | `[AC-01]` | Đạt |
+| Test Phase 1 còn đạt với số chuẩn (regression) | 41 test `contract.test.mjs` viết lại theo số chuẩn (bảng "Đổi") | `contract.test.mjs` | Đạt |
+| `--night 1/2/3`, `night_start`, snapshot v1.1, bản đồ chuẩn | Chạy CLI thật | `[AC-02]`, `[AC-03]`, `[AC-04]` | Đạt |
+| Lướt; bục nhảy (Đêm 2, 3); cầu tre; dốc/vách/tháp | Chạy CLI thật với inputs | `[AC-10]`…`[AC-13]` | Đạt |
+| Rơi khỏi đảo, hồi sinh; tạm dừng; gió mạnh | Chạy CLI thật | `[AC-14]`, `[AC-15]`, `[AC-16]` | Đạt |
+| Gió Lạc; Bùa Gió | Chạy CLI thật | `[AC-20]` (4 test), `[AC-21]` (2 test) | Đạt |
+| Vùng an toàn, lịch sinh Bóng Mực, điểm, thắng/thua, thứ tự trong tick | Chạy CLI thật | `[AC-30]`…`[AC-34]` | Đạt |
+| Định dạng scenario/inputs v1.1, mã thoát 2 | 8 ca sai + 3 ca đúng | `[AC-40]` | Đạt |
+| Headless một Đêm ≤ 30 s | Đo đồng hồ tường | `[AC-50]`, `phase-2/perf-fullnight.txt` | Đạt (< 1 s) |
+| Mọi đèn trên Đêm 2/3 tới được (qua cầu, dốc, bục nhảy) | Bot `--calm` thắng | `[winnable]`, `phase-2/bot-output.txt` | Đạt |
+| Chuỗi 3 Đêm, tạm dừng, cài đặt, HUD, âm thanh, bảng màu | Kiểm tay trên Chrome + ảnh | `docs/media/phase2-*.png`, `docs/spec/phase-2.md` (AC-60..67) | Đạt, kiểm tay (âm thanh chỉ kiểm tai) |
+| ≥ 30 FPS ở 1280×720 | Playwright + Chrome GL phần mềm (2 CPU): 30–39 FPS; máy có GPU cao hơn | `assumptions-phase2.md` P2-12, `?fps` | Đạt (đo trong môi trường yếu nhất) |
+| Sáng tạo/hiển thị không đổi đầu ra headless | Test ranh giới lõi/hiển thị | `[purity]` | Đạt |
+
+Ghi chú trung thực: bot ngây thơ chỉ thắng được Đêm 1 (≥ 4/20 seed); Đêm 2/3 có kẻ địch nên bot không thắng ổn định, nhưng đã chứng minh mọi đèn tới được khi tắt kẻ địch (`--calm`). Chưa kiểm một người chơi thật hoàn thành Đêm 2/3.
+
 ## Phase 3
 
 ## Phase 4
