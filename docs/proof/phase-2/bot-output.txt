@@ -1,0 +1,123 @@
+commit: 6ec14a480b882faeabdfbb556d51bffab7da4989
+thoi gian (UTC): 2026-11-20T08:43:38.426Z
+lenh: node scripts/bot.mjs --night 1 --seeds 20 --mode good
+---
+seed   1: lost dawn       300.0s  diem   815  mau 3  den 4/5
+seed   2: lost dawn       300.0s  diem   205  mau 3  den 1/5
+seed   3: lost dawn       300.0s  diem   605  mau 3  den 3/5
+seed   4: lost dawn       300.0s  diem   200  mau 3  den 1/5
+seed   5: won  all_lit    244.4s  diem  1265  mau 2  den 5/5
+seed   6: lost no_flames   98.3s  diem   600  mau 0  den 3/5
+seed   7: lost dawn       300.0s  diem   915  mau 1  den 4/5
+seed   8: lost dawn       300.0s  diem   435  mau 2  den 2/5
+seed   9: lost dawn       300.0s  diem   645  mau 1  den 3/5
+seed  10: won  all_lit    162.3s  diem  1384  mau 2  den 5/5
+seed  11: won  all_lit    195.9s  diem  1363  mau 3  den 5/5
+seed  12: lost dawn       300.0s  diem   410  mau 1  den 2/5
+seed  13: lost dawn       300.0s  diem   200  mau 1  den 1/5
+seed  14: won  all_lit    194.7s  diem  1320  mau 2  den 5/5
+seed  15: lost dawn       300.0s  diem   400  mau 2  den 2/5
+seed  16: lost dawn       300.0s  diem   405  mau 3  den 2/5
+seed  17: lost dawn       300.0s  diem   435  mau 2  den 2/5
+seed  18: lost dawn       300.0s  diem     0  mau 3  den 0/5
+seed  19: won  all_lit    193.7s  diem  1332  mau 2  den 5/5
+seed  20: won  all_lit    198.4s  diem  1367  mau 3  den 5/5
+
+Dem 1, che do good: thang 6/20
+
+lenh: node scripts/bot.mjs --night 1 --seeds 3 --mode idle
+---
+seed   1: lost no_flames   99.6s  diem     0  mau 0  den 0/5
+seed   2: lost no_flames  101.8s  diem     0  mau 0  den 0/5
+seed   3: lost no_flames  201.5s  diem     0  mau 0  den 0/5
+
+Dem 1, che do idle: thang 0/3
+
+lenh: node scripts/bot.mjs --night 2 --seeds 20 --mode good
+---
+seed   1: lost dawn       330.0s  diem   865  mau 3  den 4/6
+seed   2: lost no_flames  113.2s  diem   320  mau 0  den 1/6
+seed   3: lost dawn       330.0s  diem   450  mau 3  den 2/6
+seed   4: lost dawn       330.0s  diem   680  mau 1  den 3/6
+seed   5: lost no_flames  141.4s  diem   215  mau 0  den 1/6
+seed   6: lost dawn       330.0s  diem   210  mau 3  den 1/6
+seed   7: lost dawn       330.0s  diem   445  mau 2  den 2/6
+seed   8: lost no_flames  329.1s  diem   680  mau 0  den 3/6
+seed   9: lost dawn       330.0s  diem   720  mau 2  den 3/6
+seed  10: lost dawn       330.0s  diem   690  mau 1  den 3/6
+seed  11: lost no_flames  299.7s  diem   630  mau 0  den 3/6
+seed  12: lost dawn       330.0s  diem   930  mau 1  den 4/6
+seed  13: lost dawn       330.0s  diem   400  mau 3  den 2/6
+seed  14: lost dawn       330.0s  diem   205  mau 3  den 1/6
+seed  15: lost dawn       330.0s  diem   240  mau 1  den 1/6
+seed  16: lost dawn       330.0s  diem   420  mau 2  den 2/6
+seed  17: lost no_flames  234.7s  diem   600  mau 0  den 3/6
+seed  18: lost dawn       330.0s  diem   620  mau 2  den 3/6
+seed  19: lost no_flames  122.3s  diem   220  mau 0  den 1/6
+seed  20: lost no_flames  230.0s  diem   840  mau 0  den 4/6
+
+Dem 2, che do good: thang 0/20
+
+lenh: node scripts/bot.mjs --night 2 --seeds 3 --mode idle
+---
+seed   1: lost no_flames   39.8s  diem     0  mau 0  den 0/6
+seed   2: lost no_flames   31.3s  diem     0  mau 0  den 0/6
+seed   3: lost no_flames   56.9s  diem     0  mau 0  den 0/6
+
+Dem 2, che do idle: thang 0/3
+
+lenh: node scripts/bot.mjs --night 2 --seeds 6 --mode good --calm (tat Bong Muc/Gio Lac: chung minh moi den toi duoc)
+---
+seed   1: won  all_lit    270.1s  diem  1368  mau 1  den 6/6
+seed   2: won  all_lit    194.6s  diem  1570  mau 2  den 6/6
+seed   3: won  all_lit    285.4s  diem  1338  mau 1  den 6/6
+seed   4: lost no_flames  245.9s  diem  1000  mau 0  den 5/6
+seed   5: won  all_lit    182.2s  diem  1644  mau 3  den 6/6
+seed   6: won  all_lit    191.8s  diem  1626  mau 3  den 6/6
+
+Dem 2, che do good: thang 5/6
+
+lenh: node scripts/bot.mjs --night 3 --seeds 20 --mode good
+---
+seed   1: lost no_flames  300.6s  diem   355  mau 0  den 1/7
+seed   2: lost no_flames  270.9s  diem   460  mau 0  den 2/7
+seed   3: lost no_flames  145.8s  diem   255  mau 0  den 1/7
+seed   4: lost no_flames   81.2s  diem    20  mau 0  den 0/7
+seed   5: lost no_flames  334.6s  diem   250  mau 0  den 1/7
+seed   6: lost no_flames  211.6s  diem   325  mau 0  den 1/7
+seed   7: lost no_flames  138.1s  diem    75  mau 0  den 0/7
+seed   8: lost dawn       360.0s  diem   735  mau 2  den 3/7
+seed   9: lost no_flames  228.8s  diem   520  mau 0  den 2/7
+seed  10: lost no_flames  127.1s  diem   230  mau 0  den 1/7
+seed  11: lost dawn       360.0s  diem    75  mau 3  den 0/7
+seed  12: lost dawn       360.0s  diem   750  mau 1  den 3/7
+seed  13: lost no_flames   47.3s  diem    25  mau 0  den 0/7
+seed  14: lost no_flames  157.2s  diem    95  mau 0  den 0/7
+seed  15: lost no_flames  193.5s  diem   315  mau 0  den 1/7
+seed  16: lost no_flames  205.9s  diem   320  mau 0  den 1/7
+seed  17: lost no_flames  171.7s  diem   105  mau 0  den 0/7
+seed  18: lost no_flames  101.4s  diem   215  mau 0  den 1/7
+seed  19: lost no_flames  123.8s  diem   430  mau 0  den 2/7
+seed  20: lost no_flames  100.5s  diem   250  mau 0  den 1/7
+
+Dem 3, che do good: thang 0/20
+
+lenh: node scripts/bot.mjs --night 3 --seeds 3 --mode idle
+---
+seed   1: lost no_flames  251.2s  diem     0  mau 0  den 0/7
+seed   2: lost no_flames   80.5s  diem     0  mau 0  den 0/7
+seed   3: lost no_flames  176.0s  diem     0  mau 0  den 0/7
+
+Dem 3, che do idle: thang 0/3
+
+lenh: node scripts/bot.mjs --night 3 --seeds 6 --mode good --calm (tat Bong Muc/Gio Lac: chung minh moi den toi duoc)
+---
+seed   1: lost dawn       360.0s  diem   200  mau 3  den 1/7
+seed   2: won  all_lit    268.6s  diem  1732  mau 3  den 7/7
+seed   3: lost dawn       360.0s  diem   400  mau 3  den 2/7
+seed   4: won  all_lit    270.0s  diem  1728  mau 3  den 7/7
+seed   5: lost dawn       360.0s  diem  1000  mau 3  den 5/7
+seed   6: lost dawn       360.0s  diem   600  mau 3  den 3/7
+
+Dem 3, che do good: thang 2/6
+

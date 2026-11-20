@@ -1,0 +1,540 @@
+phase: 2
+commit: 6ec14a480b882faeabdfbb556d51bffab7da4989
+thoi gian (UTC): 2026-11-20T08:43:38.410Z
+node: v22.23.5
+may: Windows_NT 10.0.26200 x64, 16 cpu, 16 GB RAM
+lenh: npm test
+exit code: 0
+---
+TAP version 13
+# Subtest: [B/E] dong 1 la snapshot tick 0; snapshot moi --snapshot-every; dong cuoi la 'end'
+ok 1 - [B/E] dong 1 la snapshot tick 0; snapshot moi --snapshot-every; dong cuoi la 'end'
+  ---
+  duration_ms: 67.2938
+  type: 'test'
+  ...
+# Subtest: [B] mac dinh snapshot moi 10 tick; --ticks 0 chi co snapshot 0 + end
+ok 2 - [B] mac dinh snapshot moi 10 tick; --ticks 0 chi co snapshot 0 + end
+  ---
+  duration_ms: 108.7501
+  type: 'test'
+  ...
+# Subtest: [E] toa do lam tron toi da 3 chu so thap phan
+ok 3 - [E] toa do lam tron toi da 3 chu so thap phan
+  ---
+  duration_ms: 83.0825
+  type: 'test'
+  ...
+# Subtest: [B] time_left_s = thoi luong dem - (so buoc)/60; scenario co the dat time_left_s
+ok 4 - [B] time_left_s = thoi luong dem - (so buoc)/60; scenario co the dat time_left_s
+  ---
+  duration_ms: 118.0364
+  type: 'test'
+  ...
+# Subtest: [D] scenario: dung nguyen vi tri/so luong; dung scenario khong phat su kien, khong cong diem
+ok 5 - [D] scenario: dung nguyen vi tri/so luong; dung scenario khong phat su kien, khong cong diem
+  ---
+  duration_ms: 55.1114
+  type: 'test'
+  ...
+# Subtest: [C] move [0,1], yaw 0 -> +Z, quang duong = player_speed * thoi gian
+ok 6 - [C] move [0,1], yaw 0 -> +Z, quang duong = player_speed * thoi gian
+  ---
+  duration_ms: 52.5316
+  type: 'test'
+  ...
+# Subtest: [C] move [1,0], yaw 0 -> +X
+ok 7 - [C] move [1,0], yaw 0 -> +X
+  ---
+  duration_ms: 55.9668
+  type: 'test'
+  ...
+# Subtest: [C] cong thuc yaw: theta=90 doi 'tien' (0,1) thanh +X; theta=180 thanh -Z
+ok 8 - [C] cong thuc yaw: theta=90 doi 'tien' (0,1) thanh +X; theta=180 thanh -Z
+  ---
+  duration_ms: 120.9847
+  type: 'test'
+  ...
+# Subtest: [C] vector dai hon 1 duoc chuan hoa (cheo khong nhanh hon); vector ngan = di cham hon
+ok 9 - [C] vector dai hon 1 duoc chuan hoa (cheo khong nhanh hon); vector ngan = di cham hon
+  ---
+  duration_ms: 129.0678
+  type: 'test'
+  ...
+# Subtest: [C] truong vang mat giu gia tri cu; frame sau doi move
+ok 10 - [C] truong vang mat giu gia tri cu; frame sau doi move
+  ---
+  duration_ms: 57.9853
+  type: 'test'
+  ...
+# Subtest: [C] khong co file inputs = dung yen
+ok 11 - [C] khong co file inputs = dung yen
+  ---
+  duration_ms: 57.865
+  type: 'test'
+  ...
+# Subtest: [C] nhay: y tang roi ve 0; khong doi vi tri ngang; giu phim chi nhay mot lan (canh len)
+ok 12 - [C] nhay: y tang roi ve 0; khong doi vi tri ngang; giu phim chi nhay mot lan (canh len)
+  ---
+  duration_ms: 78.6989
+  type: 'test'
+  ...
+# Subtest: [fall] v1.1: roi khoi dao -> mat 1 lua, hoi sinh tai diem xuat phat (xem v11.test.mjs de biet chi tiet)
+ok 13 - [fall] v1.1: roi khoi dao -> mat 1 lua, hoi sinh tai diem xuat phat (xem v11.test.mjs de biet chi tiet)
+  ---
+  duration_ms: 56.1605
+  type: 'test'
+  ...
+# Subtest: [mote_picked] nhat khi khoang cach <= pickup_radius (bao gom bien); ngoai bien thi khong
+ok 14 - [mote_picked] nhat khi khoang cach <= pickup_radius (bao gom bien); ngoai bien thi khong
+  ---
+  duration_ms: 56.2162
+  type: 'test'
+  ...
+# Subtest: [mote_picked] day gio (carry_capacity): khong nhat them
+ok 15 - [mote_picked] day gio (carry_capacity): khong nhat them
+  ---
+  duration_ms: 51.3209
+  type: 'test'
+  ...
+# Subtest: [mote_picked] nhat tung con mot, carried tang dan, den khi day gio
+ok 16 - [mote_picked] nhat tung con mot, carried tang dan, den khi day gio
+  ---
+  duration_ms: 55.1209
+  type: 'test'
+  ...
+# Subtest: [deposit + lantern_lit] nap du lantern_cost -> den sang, +per_lantern, carried giam
+ok 17 - [deposit + lantern_lit] nap du lantern_cost -> den sang, +per_lantern, carried giam
+  ---
+  duration_ms: 52.0754
+  type: 'test'
+  ...
+# Subtest: [deposit] nap tung phan: chua du thi chua sang; lan nap sau cong don
+ok 18 - [deposit] nap tung phan: chua du thi chua sang; lan nap sau cong don
+  ---
+  duration_ms: 68.6561
+  type: 'test'
+  ...
+# Subtest: [deposit] giu phim interact chi nap mot lan (kich hoat khi false->true)
+ok 19 - [deposit] giu phim interact chi nap mot lan (kich hoat khi false->true)
+  ---
+  duration_ms: 72.0939
+  type: 'test'
+  ...
+# Subtest: [deposit] ngoai interact_radius thi khong nap; tay khong (carried=0) thi khong nap
+ok 20 - [deposit] ngoai interact_radius thi khong nap; tay khong (carried=0) thi khong nap
+  ---
+  duration_ms: 180.1815
+  type: 'test'
+  ...
+# Subtest: [scenario] den dat san lit:true khong cong diem va khong phat su kien
+ok 21 - [scenario] den dat san lit:true khong cong diem va khong phat su kien
+  ---
+  duration_ms: 58.8891
+  type: 'test'
+  ...
+# Subtest: [pulse] lam choang + day lui Bong Muc trong pulse_radius, ton pulse_cost, +per_stun
+ok 22 - [pulse] lam choang + day lui Bong Muc trong pulse_radius, ton pulse_cost, +per_stun
+  ---
+  duration_ms: 67.3007
+  type: 'test'
+  ...
+# Subtest: [pulse] khong du anh sang (carried < pulse_cost) thi khong toa sang
+ok 23 - [pulse] khong du anh sang (carried < pulse_cost) thi khong toa sang
+  ---
+  duration_ms: 58.0908
+  type: 'test'
+  ...
+# Subtest: [pulse] hoi chieu: bam lai trong pulse_cooldown_s bi bo qua, het hoi thi toa lai duoc
+ok 24 - [pulse] hoi chieu: bam lai trong pulse_cooldown_s bi bo qua, het hoi thi toa lai duoc
+  ---
+  duration_ms: 73.5366
+  type: 'test'
+  ...
+# Subtest: [pulse] choang keo dai dung pulse_stun_s (120 tick) roi Bong Muc duoi tiep; day lui xong trong 15 tick
+ok 25 - [pulse] choang keo dai dung pulse_stun_s (120 tick) roi Bong Muc duoi tiep; day lui xong trong 15 tick
+  ---
+  duration_ms: 76.6741
+  type: 'test'
+  ...
+# Subtest: [shade] duoi theo nguoi choi voi shade_speed khi trong tam phat hien 12 m
+ok 26 - [shade] duoi theo nguoi choi voi shade_speed khi trong tam phat hien 12 m
+  ---
+  duration_ms: 65.4426
+  type: 'test'
+  ...
+# Subtest: [shade] ngoai 12 m thi chua phat hien (lang thang), chi bat dau duoi khi vao tam
+ok 27 - [shade] ngoai 12 m thi chua phat hien (lang thang), chi bat dau duoi khi vao tam
+  ---
+  duration_ms: 62.2267
+  type: 'test'
+  ...
+# Subtest: [player_hit] cham (<= shade_hit_radius): mat 1 mau, roi hit_drop_ratio so dom dom, dom dom roi ra dat
+ok 28 - [player_hit] cham (<= shade_hit_radius): mat 1 mau, roi hit_drop_ratio so dom dom, dom dom roi ra dat
+  ---
+  duration_ms: 59.1483
+  type: 'test'
+  ...
+# Subtest: [player_hit] bat tu invuln_s: cac don danh cach nhau dung invuln_s; het mau thi thua (no_flames)
+ok 29 - [player_hit] bat tu invuln_s: cac don danh cach nhau dung invuln_s; het mau thi thua (no_flames)
+  ---
+  duration_ms: 66.8212
+  type: 'test'
+  ...
+# Subtest: [safe_radius] Bong Muc khong vao vung an toan quanh den da thap (moi snapshot)
+ok 30 - [safe_radius] Bong Muc khong vao vung an toan quanh den da thap (moi snapshot)
+  ---
+  duration_ms: 66.8825
+  type: 'test'
+  ...
+# Subtest: [safe_radius] nguoi choi dung canh den da thap khong bi cham
+ok 31 - [safe_radius] nguoi choi dung canh den da thap khong bi cham
+  ---
+  duration_ms: 82.3602
+  type: 'test'
+  ...
+# Subtest: [game_over won] tha den cuoi cung -> thang ngay, diem thuong theo giay/mau con lai
+ok 32 - [game_over won] tha den cuoi cung -> thang ngay, diem thuong theo giay/mau con lai
+  ---
+  duration_ms: 55.1338
+  type: 'test'
+  ...
+# Subtest: [game_over lost dawn] het gio -> thua 'dawn' dung tick time_left_s*60
+ok 33 - [game_over lost dawn] het gio -> thua 'dawn' dung tick time_left_s*60
+  ---
+  duration_ms: 61.8905
+  type: 'test'
+  ...
+# Subtest: [end] game ket thuc thi dung chay du --ticks; ket thuc van thoat 0
+ok 34 - [end] game ket thuc thi dung chay du --ticks; ket thuc van thoat 0
+  ---
+  duration_ms: 52.9042
+  type: 'test'
+  ...
+# Subtest: [random] random_motes:false / random_shades:false: khong tu sinh gi sau nhieu tick
+ok 35 - [random] random_motes:false / random_shades:false: khong tu sinh gi sau nhieu tick
+  ---
+  duration_ms: 76.8016
+  type: 'test'
+  ...
+# Subtest: [random] mac dinh co dom dom & Bong Muc; Bong Muc moi sinh phat shade_spawned
+ok 36 - [random] mac dinh co dom dom & Bong Muc; Bong Muc moi sinh phat shade_spawned
+  ---
+  duration_ms: 104.5089
+  type: 'test'
+  ...
+# Subtest: [tat dinh] cung seed + scenario + inputs -> output giong het (ca id tu sinh)
+ok 37 - [tat dinh] cung seed + scenario + inputs -> output giong het (ca id tu sinh)
+  ---
+  duration_ms: 264.1232
+  type: 'test'
+  ...
+# Subtest: [tat dinh] khac seed -> khac the gioi (khong 'tat dinh' bang cach bo qua seed)
+ok 38 - [tat dinh] khac seed -> khac the gioi (khong 'tat dinh' bang cach bo qua seed)
+  ---
+  duration_ms: 117.8286
+  type: 'test'
+  ...
+# Subtest: [loi] inputs/scenario sai dinh dang -> ma thoat 2 + thong bao o stderr
+ok 39 - [loi] inputs/scenario sai dinh dang -> ma thoat 2 + thong bao o stderr
+  ---
+  duration_ms: 861.4858
+  type: 'test'
+  ...
+# Subtest: [loi] file khong ton tai -> 2; thieu tham so / sai tham so -> ma thoat khac 0
+ok 40 - [loi] file khong ton tai -> 2; thieu tham so / sai tham so -> ma thoat khac 0
+  ---
+  duration_ms: 414.1685
+  type: 'test'
+  ...
+# Subtest: [contract] game.contract.json: du truong, lantern_count_night1 = 5, khong con so 0 'chua dien'
+ok 41 - [contract] game.contract.json: du truong, lantern_count_night1 = 5, khong con so 0 'chua dien'
+  ---
+  duration_ms: 0.2034
+  type: 'test'
+  ...
+# Subtest: [purity] src/core khong dung Math.random, Date, performance, process, DOM, mang, file
+ok 42 - [purity] src/core khong dung Math.random, Date, performance, process, DOM, mang, file
+  ---
+  duration_ms: 3.6397
+  type: 'test'
+  ...
+# Subtest: [purity] src/core khong import tu web/ hay headless/ (phu thuoc mot chieu: web -> core)
+ok 43 - [purity] src/core khong import tu web/ hay headless/ (phu thuoc mot chieu: web -> core)
+  ---
+  duration_ms: 1.3015
+  type: 'test'
+  ...
+# Subtest: [purity] ban choi 3D chi doc trang thai qua API cong khai cua loi (createGame/step/timeLeft)
+ok 44 - [purity] ban choi 3D chi doc trang thai qua API cong khai cua loi (createGame/step/timeLeft)
+  ---
+  duration_ms: 0.9949
+  type: 'test'
+  ...
+# Subtest: cung seed -> cung chuoi so (tat dinh)
+ok 45 - cung seed -> cung chuoi so (tat dinh)
+  ---
+  duration_ms: 0.6848
+  type: 'test'
+  ...
+# Subtest: khac seed -> khac chuoi so
+ok 46 - khac seed -> khac chuoi so
+  ---
+  duration_ms: 0.1606
+  type: 'test'
+  ...
+# Subtest: gia tri nam trong [0, 1)
+ok 47 - gia tri nam trong [0, 1)
+  ---
+  duration_ms: 1.1794
+  type: 'test'
+  ...
+# Subtest: [serve] posix: cho phep web/, src/core/, game.contract.json
+ok 48 - [serve] posix: cho phep web/, src/core/, game.contract.json
+  ---
+  duration_ms: 0.9269
+  type: 'test'
+  ...
+# Subtest: [serve] posix: chan .env, .git, package.json, src/headless, traversal
+ok 49 - [serve] posix: chan .env, .git, package.json, src/headless, traversal
+  ---
+  duration_ms: 0.3013
+  type: 'test'
+  ...
+# Subtest: [serve] win32: cho phep web/, src/core/, game.contract.json
+ok 50 - [serve] win32: cho phep web/, src/core/, game.contract.json
+  ---
+  duration_ms: 1.1538
+  type: 'test'
+  ...
+# Subtest: [serve] win32: chan .env, .git, package.json, src/headless, traversal
+ok 51 - [serve] win32: chan .env, .git, package.json, src/headless, traversal
+  ---
+  duration_ms: 0.1785
+  type: 'test'
+  ...
+# Subtest: [AC-01] so chuan Ticket-02 + khoa moi cua contract v1.1
+ok 52 - [AC-01] so chuan Ticket-02 + khoa moi cua contract v1.1
+  ---
+  duration_ms: 1.5454
+  type: 'test'
+  ...
+# Subtest: [AC-02] --night 1|2|3: night_start, so den (5/6/7), thoi luong (300/330/360), truong snapshot v1.1
+ok 53 - [AC-02] --night 1|2|3: night_start, so den (5/6/7), thoi luong (300/330/360), truong snapshot v1.1
+  ---
+  duration_ms: 192.4119
+  type: 'test'
+  ...
+# Subtest: [AC-03] ban do chuan: toa do den Dem 1/2/3 dung bang Ticket-02
+ok 54 - [AC-03] ban do chuan: toa do den Dem 1/2/3 dung bang Ticket-02
+  ---
+  duration_ms: 313.9906
+  type: 'test'
+  ...
+# Subtest: [AC-04] 20 dom dom o 20 diem khac nhau luc dau; +1 moi 240 tick vao diem trong; Dem 1 chi co 24 diem nen toi da 24
+ok 55 - [AC-04] 20 dom dom o 20 diem khac nhau luc dau; +1 moi 240 tick vao diem trong; Dem 1 chi co 24 diem nen toi da 24
+  ---
+  duration_ms: 190.5004
+  type: 'test'
+  ...
+# Subtest: [AC-10] dash: 14 m/s trong 12 tick (2.8 m), su kien dash, hoi chieu 1.5 s tinh tu luc bat dau, khong dash lai khi dang hoi
+ok 56 - [AC-10] dash: 14 m/s trong 12 tick (2.8 m), su kien dash, hoi chieu 1.5 s tinh tu luc bat dau, khong dash lai khi dang hoi
+  ---
+  duration_ms: 88.1284
+  type: 'test'
+  ...
+# Subtest: [AC-10] dash khong di chuyen thi lao theo huong dang nhin; khi nhay giu nguyen do cao
+ok 57 - [AC-10] dash khong di chuyen thi lao theo huong dang nhin; khi nhay giu nguyen do cao
+  ---
+  duration_ms: 111.272
+  type: 'test'
+  ...
+# Subtest: [AC-11] bục nhảy Dem 2: bay sang dao kia va ha canh an toan (apex ~4.9 m)
+ok 58 - [AC-11] bục nhảy Dem 2: bay sang dao kia va ha canh an toan (apex ~4.9 m)
+  ---
+  duration_ms: 71.1779
+  type: 'test'
+  ...
+# Subtest: [AC-11] bục nhảy Dem 3: tu tang 1 bay len tang 2 (Y=6) va tha den L1
+ok 59 - [AC-11] bục nhảy Dem 3: tu tang 1 bay len tang 2 (Y=6) va tha den L1
+  ---
+  duration_ms: 68.5507
+  type: 'test'
+  ...
+# Subtest: [AC-12] Dem 2: di tu dao A qua cau tre sang dao B khong roi; ra khoi cau thi roi
+ok 60 - [AC-12] Dem 2: di tu dao A qua cau tre sang dao B khong roi; ra khoi cau thi roi
+  ---
+  duration_ms: 111.9102
+  type: 'test'
+  ...
+# Subtest: [AC-13] Dem 3: doc 30 do noi tang 0 len tang 1 (Y=3); vach tang 2 khong leo duoc; thap chuong la vat can
+ok 61 - [AC-13] Dem 3: doc 30 do noi tang 0 len tang 1 (Y=3); vach tang 2 khong leo duoc; thap chuong la vat can
+  ---
+  duration_ms: 162.7473
+  type: 'test'
+  ...
+# Subtest: [AC-14] roi khoi dao (Y<-10): -1 lua, mat het dom dom, cho 60 tick, hoi sinh o diem xuat phat voi bat tu 1.5 s
+ok 62 - [AC-14] roi khoi dao (Y<-10): -1 lua, mat het dom dom, cho 60 tick, hoi sinh o diem xuat phat voi bat tu 1.5 s
+  ---
+  duration_ms: 78.1368
+  type: 'test'
+  ...
+# Subtest: [AC-14] roi khi con 1 lua -> thua ngay (no_flames)
+ok 63 - [AC-14] roi khi con 1 lua -> thua ngay (no_flames)
+  ---
+  duration_ms: 53.7735
+  type: 'test'
+  ...
+# Subtest: [AC-15] pause: sim dung hang, state 'paused', su kien paused/resumed, input bi bo qua khi dang tam dung
+ok 64 - [AC-15] pause: sim dung hang, state 'paused', su kien paused/resumed, input bi bo qua khi dang tam dung
+  ---
+  duration_ms: 75.3247
+  type: 'test'
+  ...
+# Subtest: [AC-15] pause dong bang bo dem: hoi chieu, bat tu, TTL dom dom roi
+ok 65 - [AC-15] pause dong bang bo dem: hoi chieu, bat tu, TTL dom dom roi
+  ---
+  duration_ms: 82.4919
+  type: 'test'
+  ...
+# Subtest: [AC-16] gio manh: bat sau 30 s, keo 5 s, day 2 m/s theo huong dir_deg; canh bao dir truoc 2 s
+ok 66 - [AC-16] gio manh: bat sau 30 s, keo 5 s, day 2 m/s theo huong dir_deg; canh bao dir truoc 2 s
+  ---
+  duration_ms: 106.8148
+  type: 'test'
+  ...
+# Subtest: [AC-16] Dem 3 co gio mac dinh, Dem 1/2 khong
+ok 67 - [AC-16] Dem 3 co gio mac dinh, Dem 1/2 khong
+  ---
+  duration_ms: 195.9366
+  type: 'test'
+  ...
+# Subtest: [AC-20] Gio Lac duoi khi mang >=5 (<=15 m), cuop min(3, mang) mot lan, khong mat lua, roi bo chay
+ok 68 - [AC-20] Gio Lac duoi khi mang >=5 (<=15 m), cuop min(3, mang) mot lan, khong mat lua, roi bo chay
+  ---
+  duration_ms: 62.5674
+  type: 'test'
+  ...
+# Subtest: [AC-20] Gio Lac khong quan tam khi mang <5 va ngoai 15 m (idle)
+ok 69 - [AC-20] Gio Lac khong quan tam khi mang <5 va ngoai 15 m (idle)
+  ---
+  duration_ms: 112.9555
+  type: 'test'
+  ...
+# Subtest: [AC-20] pulse len Gio Lac dang duoi -> bo chay khong cuop; pulse len Gio Lac dang mang chiu -> roi het, bien mat sau 120 tick
+ok 70 - [AC-20] pulse len Gio Lac dang duoi -> bo chay khong cuop; pulse len Gio Lac dang mang chiu -> roi het, bien mat sau 120 tick
+  ---
+  duration_ms: 105.8038
+  type: 'test'
+  ...
+# Subtest: [AC-20] Gio Lac tu sinh o Dem 2 luc tick 1200, 2400; toi da 2 con; ID D1, D2
+ok 71 - [AC-20] Gio Lac tu sinh o Dem 2 luc tick 1200, 2400; toi da 2 con; ID D1, D2
+  ---
+  duration_ms: 146.0079
+  type: 'test'
+  ...
+# Subtest: [AC-21] Bua Gio: nhat -> su kien, 10 s, chay 7.2 m/s, dash khong hoi chieu, hoi sinh sau 2700 tick
+ok 72 - [AC-21] Bua Gio: nhat -> su kien, 10 s, chay 7.2 m/s, dash khong hoi chieu, hoi sinh sau 2700 tick
+  ---
+  duration_ms: 101.0295
+  type: 'test'
+  ...
+# Subtest: [AC-21] Bua Gio tang toc chay len 7.2 m/s
+ok 73 - [AC-21] Bua Gio tang toc chay len 7.2 m/s
+  ---
+  duration_ms: 55.5048
+  type: 'test'
+  ...
+# Subtest: [AC-30] den vua thap: Bong Muc dang o trong vung an toan bi day ra mep trong <=30 tick, khong sat thuong
+ok 74 - [AC-30] den vua thap: Bong Muc dang o trong vung an toan bi day ra mep trong <=30 tick, khong sat thuong
+  ---
+  duration_ms: 67.6689
+  type: 'test'
+  ...
+# Subtest: [AC-31] lich Bong Muc: 2 con luc tick 300, sau do 1 con moi 480/420/360 tick (Dem 1/2/3); toi da 6/8/10
+ok 75 - [AC-31] lich Bong Muc: 2 con luc tick 300, sau do 1 con moi 480/420/360 tick (Dem 1/2/3); toi da 6/8/10
+  ---
+  duration_ms: 195.4801
+  type: 'test'
+  ...
+# Subtest: [AC-31] Bong Muc moi sinh o trang thai 'spawning' roi 'wander'; ten trang thai dung quy dinh
+ok 76 - [AC-31] Bong Muc moi sinh o trang thai 'spawning' roi 'wander'; ten trang thai dung quy dinh
+  ---
+  duration_ms: 119.3307
+  type: 'test'
+  ...
+# Subtest: [AC-32] diem: +10 moi dom dom nap, +100 moi den, +5 moi Bong Muc bi tia sang (ke ca dang choang)
+ok 77 - [AC-32] diem: +10 moi dom dom nap, +100 moi den, +5 moi Bong Muc bi tia sang (ke ca dang choang)
+  ---
+  duration_ms: 76.5327
+  type: 'test'
+  ...
+# Subtest: [AC-33] thang o tick het gio van la thang; thang -> game_over won, diem = diem + floor(giay con)*2 + 50*lua
+ok 78 - [AC-33] thang o tick het gio van la thang; thang -> game_over won, diem = diem + floor(giay con)*2 + 50*lua
+  ---
+  duration_ms: 55.8315
+  type: 'test'
+  ...
+# Subtest: [AC-33] Dem 3: 7 den, thang khi thap het
+ok 79 - [AC-33] Dem 3: 7 den, thang khi thap het
+  ---
+  duration_ms: 70.9602
+  type: 'test'
+  ...
+# Subtest: [AC-34] thu tu trong tick: Gio Lac cuop truoc, Bong Muc cham sau; bat tu khong chan viec cuop
+ok 80 - [AC-34] thu tu trong tick: Gio Lac cuop truoc, Bong Muc cham sau; bat tu khong chan viec cuop
+  ---
+  duration_ms: 60.1686
+  type: 'test'
+  ...
+# Subtest: [AC-40] scenario/inputs v1.1 sai dinh dang -> ma thoat 2; dung dinh dang thi chay
+ok 81 - [AC-40] scenario/inputs v1.1 sai dinh dang -> ma thoat 2; dung dinh dang thi chay
+  ---
+  duration_ms: 683.4646
+  type: 'test'
+  ...
+# Subtest: [AC-40] den L6/L7 chi hop le o Dem 2/3
+ok 82 - [AC-40] den L6/L7 chi hop le o Dem 2/3
+  ---
+  duration_ms: 251.7419
+  type: 'test'
+  ...
+# Subtest: [AC-50] headless nguyen mot dem (21 600 tick) <= 30 s, deterministic
+ok 83 - [AC-50] headless nguyen mot dem (21 600 tick) <= 30 s, deterministic
+  ---
+  duration_ms: 1103.7943
+  type: 'test'
+  ...
+# Subtest: [winnable] Dem 1: bot ngay tho (chi biet ne + nhat + thap) van thang >= 20% so seed voi so chuan Ticket-02
+ok 84 - [winnable] Dem 1: bot ngay tho (chi biet ne + nhat + thap) van thang >= 20% so seed voi so chuan Ticket-02
+  ---
+  duration_ms: 1479.0223
+  type: 'test'
+  ...
+# Subtest: [winnable] Dem 2 va Dem 3: khi tat Bong Muc/Gio Lac, bot toi du moi den (qua cau, doc, buc nhay) va thang
+ok 85 - [winnable] Dem 2 va Dem 3: khi tat Bong Muc/Gio Lac, bot toi du moi den (qua cau, doc, buc nhay) va thang
+  ---
+  duration_ms: 127.3556
+  type: 'test'
+  ...
+# Subtest: [winnable] dung yen thi THUA (game khong tu thang)
+ok 86 - [winnable] dung yen thi THUA (game khong tu thang)
+  ---
+  duration_ms: 265.1795
+  type: 'test'
+  ...
+# Subtest: [winnable] bot choi hai lan cung seed -> cung ket qua (tat dinh ca khi co AI)
+ok 87 - [winnable] bot choi hai lan cung seed -> cung ket qua (tat dinh ca khi co AI)
+  ---
+  duration_ms: 170.213
+  type: 'test'
+  ...
+1..87
+# tests 87
+# suites 0
+# pass 87
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5345.7175
