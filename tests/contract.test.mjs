@@ -1,4 +1,4 @@
-// Test theo Test Contract v1.0 - chay CLI headless that, doc output that.
+// Test theo Test Contract v1.1 (so chuan Ticket-02) - chay CLI headless that, doc output that.
 // Moi test ghi ro no kiem yeu cau nao (xem docs/proof/README.md).
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -26,7 +26,8 @@ test("[B] mac dinh snapshot moi 10 tick; --ticks 0 chi co snapshot 0 + end", () 
   assert.deepEqual(r.snaps.map((s) => s.tick), [0, 10, 20, 30]);
   const z = run({ ticks: 0, scenario: empty() });
   assert.equal(z.status, 0);
-  assert.equal(z.lines.length, 2);
+  assert.equal(z.lines.length, 3, "snapshot 0 + night_start + end");
+  assert.equal(z.lines[1].name, "night_start");
   assert.equal(z.end.ticks, 0);
 });
 
@@ -53,7 +54,7 @@ test("[D] scenario: dung nguyen vi tri/so luong; dung scenario khong phat su kie
     }),
   });
   const s = r.snaps[0];
-  assert.deepEqual(s.player, { pos: [1, 0, 2], flames: 2, carried: 4 });
+  assert.deepEqual([s.player.pos, s.player.flames, s.player.carried], [[1, 0, 2], 2, 4]);
   assert.equal(s.motes_active, 2);
   assert.deepEqual(s.shades.map((x) => x.id), ["X9"]);
   const l2 = s.lanterns.find((l) => l.id === "L2");
@@ -117,12 +118,10 @@ test("[C] nhay: y tang roi ve 0; khong doi vi tri ngang; giu phim chi nhay mot l
   assert.ok(r.snaps.every((s) => s.player.pos[0] === 0 && s.player.pos[2] === 0));
 });
 
-test("[B] dao khong co phat roi: di thang mai van o tren mat dao, y = 0", () => {
-  const r = run({ ticks: 3000, every: 3000, scenario: empty({ time_left_s: 600 }), inputs: { frames: [{ tick: 0, move: [1, 0] }] } });
-  const p = r.snaps.at(-1).player.pos;
-  assert.equal(T.fall_enabled, false);
-  assert.ok(Math.hypot(p[0], p[2]) <= 80.001 && p[1] === 0, `pos=${p}`);
-  assert.equal(r.events.filter((e) => e.name === "player_hit").length, 0);
+test("[fall] v1.1: roi khoi dao -> mat 1 lua, hoi sinh tai diem xuat phat (xem v11.test.mjs de biet chi tiet)", () => {
+  const r = run({ ticks: 600, every: 600, scenario: empty({ time_left_s: 600 }), inputs: { frames: [{ tick: 0, move: [1, 0] }] } });
+  assert.equal(T.fall_enabled, true);
+  assert.equal(r.events.filter((e) => e.name === "player_hit" && e.data.by === "fall").length, 1);
 });
 
 // ---------- Nhat dom dom ----------
@@ -132,7 +131,7 @@ test("[mote_picked] nhat khi khoang cach <= pickup_radius (bao gom bien); ngoai 
   const s = r.snaps.at(-1);
   assert.equal(s.player.carried, 1);
   assert.equal(s.motes_active, 1);
-  assert.equal(s.score, S.per_mote);
+  assert.equal(s.score, 0, "v1.1: diem cong luc nap vao den, khong phai luc nhat");
 });
 
 test("[mote_picked] day gio (carry_capacity): khong nhat them", () => {
@@ -162,7 +161,7 @@ test("[deposit + lantern_lit] nap du lantern_cost -> den sang, +per_lantern, car
   const s = r.snaps.at(-1);
   assert.equal(s.player.carried, 2);
   assert.equal(s.lanterns[0].lit, true);
-  assert.equal(s.score, S.per_lantern);
+  assert.equal(s.score, S.per_lantern + T.lantern_cost * S.per_mote);
 });
 
 test("[deposit] nap tung phan: chua du thi chua sang; lan nap sau cong don", () => {
@@ -215,7 +214,7 @@ test("[scenario] den dat san lit:true khong cong diem va khong phat su kien", ()
 // ---------- Toa sang ----------
 test("[pulse] lam choang + day lui Bong Muc trong pulse_radius, ton pulse_cost, +per_stun", () => {
   const r = run({
-    ticks: 1, every: 1, scenario: empty({ player: { carried: 5 }, shades: [{ id: "S1", pos: [5, 0, 0] }, { id: "S2", pos: [T.pulse_radius, 0, 0] }, { id: "S3", pos: [0, 0, T.pulse_radius + 0.01] }] }),
+    ticks: 1, every: 1, scenario: empty({ player: { carried: 5 }, shades: [{ id: "S1", pos: [4, 0.8, 0] }, { id: "S2", pos: [T.pulse_radius, 0.8, 0] }, { id: "S3", pos: [0, 0.8, T.pulse_radius + 0.01] }] }),
     inputs: { frames: [{ tick: 0, pulse: true }] },
   });
   assert.deepEqual(r.events, [{ type: "event", tick: 1, name: "pulse", data: { stunned_ids: ["S1", "S2"] } }]);
@@ -224,13 +223,13 @@ test("[pulse] lam choang + day lui Bong Muc trong pulse_radius, ton pulse_cost, 
   assert.equal(s.score, 2 * S.per_stun);
   const by = Object.fromEntries(s.shades.map((x) => [x.id, x]));
   assert.equal(by.S1.state, "stunned");
-  assert.ok(near(by.S1.pos[0], 5 + T.pulse_push_m), `S1 bi day ${by.S1.pos}`);
-  assert.equal(by.S3.state, "chase");
+  assert.ok(by.S1.pos[0] > 4, `S1 bat dau bi day ra xa ${by.S1.pos}`);
+  assert.notEqual(by.S3.state, "stunned");
 });
 
 test("[pulse] khong du anh sang (carried < pulse_cost) thi khong toa sang", () => {
   const r = run({
-    ticks: 1, scenario: empty({ player: { carried: T.pulse_cost - 1 }, shades: [{ pos: [5, 0, 0] }] }),
+    ticks: 1, scenario: empty({ player: { carried: T.pulse_cost - 1 }, shades: [{ pos: [4, 0.8, 0] }] }),
     inputs: { frames: [{ tick: 0, pulse: true }] },
   });
   assert.equal(r.events.length, 0);
@@ -245,26 +244,32 @@ test("[pulse] hoi chieu: bam lai trong pulse_cooldown_s bi bo qua, het hoi thi t
   assert.deepEqual(pulses.map((p) => p.tick), [1, cd + 1]);
 });
 
-test("[pulse] choang keo dai dung pulse_stun_s roi Bong Muc duoi tiep", () => {
+test("[pulse] choang keo dai dung pulse_stun_s (120 tick) roi Bong Muc duoi tiep; day lui xong trong 15 tick", () => {
   const stunTicks = Math.round(T.pulse_stun_s * 60);
   const r = run({
     ticks: stunTicks + 30, every: 1,
-    scenario: empty({ player: { carried: 2 }, shades: [{ id: "S1", pos: [6, 0, 0] }] }),
+    scenario: empty({ player: { carried: 5 }, shades: [{ id: "S1", pos: [4, 0.8, 0] }] }),
     inputs: { frames: [{ tick: 0, pulse: true }, { tick: 1, pulse: false }] },
   });
   const sh = (tick) => r.snaps[tick].shades[0];
   assert.equal(sh(1).state, "stunned");
-  const x1 = sh(1).pos[0];
-  assert.equal(sh(stunTicks - 1).pos[0], x1, "dung yen khi dang choang");
-  assert.equal(sh(stunTicks - 1).state, "stunned");
-  assert.equal(sh(stunTicks).state, "chase");
-  assert.ok(sh(stunTicks + 20).pos[0] < x1, "het choang thi duoi lai gan nguoi choi");
+  assert.ok(near(sh(15).pos[0], 4 + T.pulse_push_m), `sau 15 tick: ${sh(15).pos}`);
+  assert.equal(sh(stunTicks).pos[0], sh(15).pos[0], "dung yen sau khi day xong");
+  assert.equal(sh(stunTicks).state, "stunned");
+  assert.notEqual(sh(stunTicks + 1).state, "stunned");
+  assert.ok(sh(stunTicks + 20).pos[0] < sh(15).pos[0], "het choang thi duoi lai gan nguoi choi");
 });
 
 // ---------- Bong Muc: duoi, cham, mat mau ----------
-test("[shade] duoi theo nguoi choi voi shade_speed", () => {
-  const r = run({ ticks: 60, every: 60, scenario: empty({ shades: [{ id: "S1", pos: [30, 0, 0] }] }) });
-  assert.ok(near(r.snaps.at(-1).shades[0].pos[0], 30 - T.shade_speed), `S1=${r.snaps.at(-1).shades[0].pos}`);
+test("[shade] duoi theo nguoi choi voi shade_speed khi trong tam phat hien 12 m", () => {
+  const r = run({ ticks: 30, every: 30, scenario: empty({ shades: [{ id: "S1", pos: [12, 0, 0] }] }) });
+  assert.ok(near(r.snaps.at(-1).shades[0].pos[0], 12 - T.shade_speed / 2), `S1=${r.snaps.at(-1).shades[0].pos}`);
+  assert.equal(r.snaps.at(-1).shades[0].state, "chase");
+});
+
+test("[shade] ngoai 12 m thi chua phat hien (lang thang), chi bat dau duoi khi vao tam", () => {
+  const r = run({ ticks: 1, every: 1, scenario: empty({ shades: [{ id: "S1", pos: [12.5, 0, 0] }] }) });
+  assert.equal(r.snaps.at(-1).shades[0].state, "wander");
 });
 
 test("[player_hit] cham (<= shade_hit_radius): mat 1 mau, roi hit_drop_ratio so dom dom, dom dom roi ra dat", () => {
@@ -317,7 +322,7 @@ test("[game_over won] tha den cuoi cung -> thang ngay, diem thuong theo giay/mau
   assert.deepEqual(r.events.map((e) => e.name), ["deposit", "lantern_lit", "game_over"]);
   assert.deepEqual(r.events.at(-1).data, { result: "won", reason: "all_lit" });
   const secondsLeft = Math.floor(T.night1_duration_s - 1 / 60);
-  const expected = S.per_lantern + secondsLeft * S.per_second_left + 2 * S.per_flame_left;
+  const expected = S.per_lantern + T.lantern_cost * S.per_mote + secondsLeft * S.per_second_left + 2 * S.per_flame_left;
   assert.deepEqual(r.end, { type: "end", ticks: 1, state: "won", score: expected });
 });
 
@@ -345,7 +350,7 @@ test("[random] random_motes:false / random_shades:false: khong tu sinh gi sau nh
 test("[random] mac dinh co dom dom & Bong Muc; Bong Muc moi sinh phat shade_spawned", () => {
   const r = run({ seed: 3, ticks: 1500, inputs: { frames: [{ tick: 0, move: [0, 0] }] } });
   assert.ok(r.snaps[0].motes_active >= 20, "co dom dom ngay tu dau");
-  assert.ok(r.snaps[0].shades.length >= 1);
+  assert.equal(r.snaps[0].shades.length, 0, "Bong Muc dau tien sinh o tick 300");
   const sp = r.events.filter((e) => e.name === "shade_spawned");
   assert.ok(sp.length >= 1);
   assert.ok(r.snaps.at(-1).shades.some((s) => s.id === sp[0].data.id));
@@ -391,7 +396,7 @@ test("[loi] inputs/scenario sai dinh dang -> ma thoat 2 + thong bao o stderr", (
 
 test("[loi] file khong ton tai -> 2; thieu tham so / sai tham so -> ma thoat khac 0", () => {
   assert.equal(run({ raw: ["--seed", "1", "--night", "1", "--ticks", "5", "--out", "/tmp/x.jsonl", "--scenario", "/khong/co/file.json"] }).status, 2);
-  for (const raw of [[], ["--seed", "1", "--night", "1", "--ticks", "5"], ["--seed", "x", "--night", "1", "--ticks", "5", "--out", "/tmp/x.jsonl"], ["--seed", "1", "--night", "2", "--ticks", "5", "--out", "/tmp/x.jsonl"], ["--seed", "1", "--night", "1", "--ticks", "5", "--out", "/tmp/x.jsonl", "--bogus", "1"]]) {
+  for (const raw of [[], ["--seed", "1", "--night", "1", "--ticks", "5"], ["--seed", "x", "--night", "1", "--ticks", "5", "--out", "/tmp/x.jsonl"], ["--seed", "1", "--night", "4", "--ticks", "5", "--out", "/tmp/x.jsonl"], ["--seed", "1", "--night", "1", "--ticks", "5", "--out", "/tmp/x.jsonl", "--bogus", "1"]]) {
     const r = run({ raw });
     assert.notEqual(r.status, 0, `raw=${raw.join(" ")}`);
     assert.ok(r.stderr.length > 0);

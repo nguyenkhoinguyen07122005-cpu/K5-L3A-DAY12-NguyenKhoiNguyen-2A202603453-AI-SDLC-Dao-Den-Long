@@ -28,5 +28,7 @@ test("[purity] ban choi 3D chi doc trang thai qua API cong khai cua loi (createG
   const imp = web.match(/import \{([^}]+)\} from "\.\.\/src\/core\/sim\.mjs"/);
   assert.ok(imp, "web/main.js phai import tu src/core/sim.mjs");
   const names = imp[1].split(",").map((x) => x.trim()).sort();
-  assert.deepEqual(names, ["TICKS_PER_SECOND", "WORLD", "createGame", "step", "timeLeft"]);
+  assert.deepEqual(names, ["TICKS_PER_SECOND", "WORLD", "createGame", "nightDuration", "step", "timeLeft"]);
+  const maps = web.match(/import \{([^}]+)\} from "\.\.\/src\/core\/maps\.mjs"/);
+  assert.ok(maps && maps[1].trim() === "NIGHTS", "web chi doc NIGHTS (du lieu thuan) tu maps.mjs");
 });

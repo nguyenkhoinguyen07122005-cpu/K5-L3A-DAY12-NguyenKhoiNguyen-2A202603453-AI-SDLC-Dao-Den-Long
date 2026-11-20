@@ -11,10 +11,10 @@ export const T = CONTRACT.tuning;
 const CLI = join(ROOT, "src", "headless", "cli.mjs");
 
 /** Chay headless. opts: {seed, ticks, scenario, inputs, every, raw: [...tham so tho]} */
-export function run({ seed = 1, ticks = 60, scenario, inputs, every, raw } = {}) {
+export function run({ seed = 1, night = 1, ticks = 60, scenario, inputs, every, raw } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "ddl-"));
   const out = join(dir, "out.jsonl");
-  const args = raw ?? ["--seed", String(seed), "--night", "1", "--ticks", String(ticks), "--out", out];
+  const args = raw ?? ["--seed", String(seed), "--night", String(night), "--ticks", String(ticks), "--out", out];
   if (!raw) {
     if (scenario !== undefined) {
       const p = join(dir, "sc.json");
@@ -47,14 +47,14 @@ export function run({ seed = 1, ticks = 60, scenario, inputs, every, raw } = {})
       }
     })(),
     snaps: lines.filter((l) => l.type === "snapshot"),
-    events: lines.filter((l) => l.type === "event"),
+    events: lines.filter((l) => l.type === "event" && l.name !== "night_start"),
     end: lines.at(-1),
   };
 }
 
-/** Scenario "san khau trong": khong sinh ngau nhien, khong con nao, 5 den dat xa nguoi choi. */
+/** Scenario "san khau trong" (v1.1): khong sinh ngau nhien, khong gio, khong Bong Muc/Gio Lac/dom dom. */
 export function empty(extra = {}) {
-  return { random_motes: false, random_shades: false, motes: [], shades: [], ...extra };
+  return { random_motes: false, random_shades: false, random_drifters: false, wind_enabled: false, motes: [], shades: [], drifters: [], ...extra };
 }
 
 export const near = (a, b, eps = 1e-3) => Math.abs(a - b) <= eps;

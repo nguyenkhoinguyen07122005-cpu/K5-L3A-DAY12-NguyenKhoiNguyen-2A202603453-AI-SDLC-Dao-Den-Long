@@ -1,6 +1,6 @@
 {
   "name": "dao-den-long",
-  "version": "1.0.0-phase1",
+  "version": "1.1.0-phase2",
   "private": true,
   "type": "module",
   "description": "Dao Den Long - game 3D (logic thuan, chay duoc headless)",
