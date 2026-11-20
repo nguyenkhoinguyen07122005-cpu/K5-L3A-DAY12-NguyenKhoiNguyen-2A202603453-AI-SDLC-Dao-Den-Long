@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đảo Đèn Lồng</title>
+<style>
+  :root { --warm:#ffcf6b; --ink:#e8ecff; --panel:rgba(10,14,32,.62); }
+  html, body { margin:0; height:100%; overflow:hidden; background:#070a18; font-family: system-ui, "Segoe UI", sans-serif; color:var(--ink); }
+  canvas#view { position:fixed; inset:0; width:100%; height:100%; display:block; }
+  .hud { position:fixed; pointer-events:none; }
+  #top { top:12px; left:12px; right:12px; display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+  .box { background:var(--panel); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:8px 14px; backdrop-filter: blur(4px); }
+  #left { display:flex; flex-direction:column; gap:6px; }
+  #flames { font-size:22px; letter-spacing:3px; }
+  #timer { font-size:30px; font-weight:700; font-variant-numeric: tabular-nums; text-align:center; }
+  #timer small { display:block; font-size:12px; font-weight:400; opacity:.75; }
+  #right { text-align:right; }
+  #score { font-size:26px; font-weight:700; color:var(--warm); font-variant-numeric: tabular-nums; }
+  #carry { display:flex; gap:3px; margin-top:4px; justify-content:flex-end; }
+  #carry i { width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.18); display:inline-block; }
+  #carry i.on { background:var(--warm); box-shadow:0 0 6px var(--warm); }
+  #lanterns { bottom:62px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+  .chip { min-width:58px; text-align:center; padding:6px 8px; font-size:13px; }
+  .chip b { display:block; font-size:15px; }
+  .chip.lit { border-color:var(--warm); box-shadow:0 0 12px rgba(255,207,107,.55); color:var(--warm); }
+  #help { bottom:12px; left:50%; transform:translateX(-50%); font-size:12.5px; opacity:.82; text-align:center; max-width:94vw; }
+  #hint { bottom:112px; left:50%; transform:translateX(-50%); font-size:15px; opacity:0; transition:opacity .25s; }
+  #hint.show { opacity:1; }
+  #flash { position:fixed; inset:0; pointer-events:none; background:radial-gradient(ellipse at center, rgba(255,40,60,0) 40%, rgba(255,40,60,.75) 100%); opacity:0; transition:opacity .35s; }
+  #flash.on { opacity:1; transition:none; }
+  #screen { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(5,8,22,.72); text-align:center; }
+  #screen.hidden { display:none; }
+  #screen .card { max-width:620px; padding:28px 34px; background:rgba(14,18,44,.92); border:1px solid rgba(255,207,107,.45); border-radius:18px; box-shadow:0 0 50px rgba(255,207,107,.18); }
+  #screen h1 { margin:0 0 6px; font-size:34px; color:var(--warm); }
+  #screen p { margin:8px 0; line-height:1.5; }
+  #screen .big { font-size:20px; }
+  #screen kbd, #help kbd { background:rgba(255,255,255,.14); border-radius:5px; padding:1px 6px; font-family:inherit; }
+  #screen .go { margin-top:16px; font-size:16px; color:var(--warm); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 50% { opacity:.45; } }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="flash"></div>
+
+<div class="hud" id="top">
+  <div id="left">
+    <div class="box" id="flames" title="Mạng còn lại"></div>
+    <div class="box" id="nearest" style="font-size:13px"></div>
+  </div>
+  <div class="box" id="timer"><span id="time">5:00</span><small>đến bình minh</small></div>
+  <div class="box" id="right">
+    <div id="score">0</div>
+    <div style="font-size:12px;opacity:.75">điểm</div>
+    <div id="carry"></div>
+    <div style="font-size:12px;opacity:.75"><span id="carryN">0</span>/<span id="carryCap">10</span> ánh sáng đang mang</div>
+  </div>
+</div>
+<div class="hud" id="lanterns"></div>
+<div class="hud box" id="hint"></div>
+<div class="hud box" id="help">
+  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / mũi tên: di chuyển · <kbd>Space</kbd> nhảy ·
+  <kbd>E</kbd> nạp ánh sáng vào đèn · <kbd>F</kbd> tỏa sáng (đẩy lùi Bóng Mực) ·
+  kéo chuột hoặc <kbd>Z</kbd>/<kbd>X</kbd>: xoay camera · <kbd>R</kbd> chơi lại · <kbd>P</kbd> tạm dừng
+</div>
+
+<div id="screen">
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+  // Hien loi len man hinh thay vi de man hinh den tro tron (chi hien thi, khong lien quan luat choi).
+  window.__ddlFatal = function (title, html) {
+    var card = document.getElementById("card");
+    card.innerHTML = "<h1>" + title + "</h1>" + html;
+    document.getElementById("screen").classList.remove("hidden");
+  };
+  window.addEventListener("error", function (e) {
+    if (document.querySelector("#card h1")) return;
+    window.__ddlFatal("Có lỗi khi chạy game", "<p>Mở F12 → Console để xem chi tiết và gửi lại cho người phát triển.</p><p style='opacity:.7;font-size:13px'>" + String(e.message).replace(/</g, "&lt;") + "</p>");
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    window.__ddlFatal("Có lỗi khi chạy game", "<p>Mở F12 → Console để xem chi tiết.</p><p style='opacity:.7;font-size:13px'>" + String(e.reason && e.reason.message || e.reason).replace(/</g, "&lt;") + "</p>");
+  });
+</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
