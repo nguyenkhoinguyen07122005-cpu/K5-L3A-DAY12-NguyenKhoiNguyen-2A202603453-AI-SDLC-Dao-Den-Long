@@ -4,7 +4,7 @@
 
 Game 3D góc nhìn thứ ba: **Mây**, người giữ đèn nhỏ tuổi đội nón lá, chạy khắp đảo nhặt đom đóm để thắp lại 5 Đèn Lồng Lớn, và né **Bóng Mực** trong sương đen. Bài Day 12 (AI SDLC) của Nguyễn Khôi Nguyên, MSSV 2A202603453.
 
-![Đêm 1: Đảo Bến](docs/media/phase2-dem1-dao-ben.png)
+![Đêm 1: Đảo Bến](docs/media/phase4-dem1-do-hoa-moi.png)
 
 Ba Đêm: **Đảo Bến** (đảo tròn), **Đảo Cau** (hai đảo nối bằng cầu tre và bục nhảy, có Gió Lạc và Bùa Gió), **Đảo Chuông** (ba tầng, dốc, bục nhảy lên đỉnh tháp, gió mạnh). Nhật ký làm từng phase: `docs/notes/`.
 

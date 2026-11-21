@@ -241,6 +241,29 @@ scene.add(skyGroup);
     skyGroup.add(c);
   }
 }
+// cuc quang: ba dai sang mem troi cham tren troi; sao bang thinh thoang
+const auroraTex = canvasTex(256, 64, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h);
+  gr.addColorStop(0, "rgba(120,255,200,0)");
+  gr.addColorStop(0.45, "rgba(120,255,210,0.55)");
+  gr.addColorStop(0.7, "rgba(140,170,255,0.3)");
+  gr.addColorStop(1, "rgba(120,100,255,0)");
+  g.fillStyle = gr;
+  g.fillRect(0, 0, w, h);
+}, [256, 64]);
+const auroras = [];
+for (let i = 0; i < 3; i++) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(260, 46, 24, 1), new THREE.MeshBasicMaterial({ map: auroraTex, transparent: true, opacity: 0.32 - i * 0.07, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false }));
+  const a = -0.9 + i * 0.9;
+  m.position.set(Math.sin(a) * 230, 105 + i * 12, -Math.cos(a) * 230);
+  m.lookAt(0, 60, 0);
+  m.userData = { base: m.position.clone(), ph: i * 2 };
+  scene.add(m);
+  auroras.push(m);
+}
+const shootStar = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+shootStar.scale.set(6, 1.2, 1);
+scene.add(shootStar);
 const skyLanterns = [];
 {
   const rnd = lcg(5);
@@ -270,6 +293,20 @@ sea.material.map = seaTex;
 sea.material.color.set(0xffffff);
 sea.material.needsUpdate = true;
 function animateScenery(time) {
+  for (const m of auroras) {
+    const u = m.userData;
+    const calm = settings.reduceMotion ? 0 : 1;
+    m.position.y = u.base.y + Math.sin(time * 0.15 + u.ph) * 5 * calm;
+    m.material.opacity = (0.2 + 0.1 * Math.sin(time * 0.3 + u.ph)) * (m === auroras[0] ? 1.3 : 1);
+  }
+  {
+    const cyc = time % 17;
+    if (cyc < 1.2 && !settings.reduceMotion) {
+      const k = cyc / 1.2;
+      shootStar.position.set(-150 + k * 150, 150 - k * 70, -170);
+      shootStar.material.opacity = Math.sin(k * Math.PI) * 0.9;
+    } else shootStar.material.opacity = 0;
+  }
   seaTex.offset.set(time * 0.004, time * 0.002);
   skyGroup.rotation.y = time * 0.004;
   for (const l of skyLanterns) {
@@ -438,6 +475,187 @@ function decorate(t, night, map) {
     crown.position.set(s[0] + tr.rotation.z * -h * 0.5, s[1] + h + 0.4, s[2]);
     t.add(tr, crown);
   }
+  // rung thong: nhieu cay (khong anh huong va cham, chi hien thi), tranh khu vuc den/bục/diem xuat phat
+  {
+    const forest = spots.filter((sp) => sp[3] > 0.85 && !sp[4] && !pts.some((q2) => Math.hypot(q2[0] - sp[0], q2[2] - sp[2]) < 8.5) && Math.hypot(map.start[0] - sp[0], map.start[2] - sp[2]) > 15).slice(0, 110);
+    const trunkG = new THREE.CylinderGeometry(0.16, 0.24, 1, 6);
+    const coneG = new THREE.ConeGeometry(1, 1, 7);
+    const ti2 = new THREE.InstancedMesh(trunkG, new THREE.MeshLambertMaterial({ color: 0x5b4030 }), forest.length);
+    const c1i = new THREE.InstancedMesh(coneG, new THREE.MeshLambertMaterial({ color: 0x1f6b52, flatShading: true }), forest.length);
+    const c2i = new THREE.InstancedMesh(coneG, new THREE.MeshLambertMaterial({ color: 0x2c8a63, flatShading: true }), forest.length);
+    const c3i = new THREE.InstancedMesh(coneG, new THREE.MeshLambertMaterial({ color: 0x3aa478, flatShading: true }), forest.length);
+    const mm = new THREE.Matrix4();
+    forest.forEach((sp, i) => {
+      const h = 3.2 + rnd() * 2.6;
+      const w = 0.8 + rnd() * 0.4;
+      mm.compose(new THREE.Vector3(sp[0], sp[1] + h * 0.25, sp[2]), q.identity(), new THREE.Vector3(1, h * 0.5, 1));
+      ti2.setMatrixAt(i, mm);
+      mm.compose(new THREE.Vector3(sp[0], sp[1] + h * 0.55, sp[2]), q.identity(), new THREE.Vector3(w * 1.9, h * 0.55, w * 1.9));
+      c1i.setMatrixAt(i, mm);
+      mm.compose(new THREE.Vector3(sp[0], sp[1] + h * 0.85, sp[2]), q.identity(), new THREE.Vector3(w * 1.5, h * 0.5, w * 1.5));
+      c2i.setMatrixAt(i, mm);
+      mm.compose(new THREE.Vector3(sp[0], sp[1] + h * 1.12, sp[2]), q.identity(), new THREE.Vector3(w * 1.05, h * 0.45, w * 1.05));
+      c3i.setMatrixAt(i, mm);
+    });
+    t.add(ti2, c1i, c2i, c3i);
+  }
+  // cay hoa (tan tron hong/tim/trang tuy dem), den da ben duong, bui hoa lon
+  {
+    const mm2 = new THREE.Matrix4();
+    const q2 = new THREE.Quaternion();
+    const bl = spots.filter((sp) => sp[3] > 0.2 && sp[3] < 0.26 && !sp[4] && !pts.some((p0) => Math.hypot(p0[0] - sp[0], p0[2] - sp[2]) < 9) && Math.hypot(map.start[0] - sp[0], map.start[2] - sp[2]) > 12).slice(0, 26);
+    const crownCol = night === 2 ? [0xffd1e8, 0xffe6a0] : night === 3 ? [0xc9a9ff, 0xffd1e8] : [0xffc2d9, 0xfff0f5];
+    const trunk2 = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.14, 0.22, 1, 6), new THREE.MeshLambertMaterial({ color: 0x4d3a2c }), bl.length);
+    const crownI = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x442233, emissiveIntensity: 0.25, flatShading: true }), bl.length * 3);
+    let ci = 0;
+    bl.forEach((sp, i) => {
+      const h = 2.6 + rnd() * 1.8;
+      mm2.compose(new THREE.Vector3(sp[0], sp[1] + h / 2, sp[2]), q2.identity(), new THREE.Vector3(1, h, 1));
+      trunk2.setMatrixAt(i, mm2);
+      for (let j = 0; j < 3; j++) {
+        const r = 1.1 + rnd() * 0.7;
+        mm2.compose(new THREE.Vector3(sp[0] + (rnd() - 0.5) * 1.8, sp[1] + h + 0.3 + rnd() * 0.9, sp[2] + (rnd() - 0.5) * 1.8), q2.identity(), new THREE.Vector3(r, r * 0.8, r));
+        crownI.setMatrixAt(ci, mm2);
+        crownI.setColorAt(ci, new THREE.Color(crownCol[(i + j) % 2]));
+        ci++;
+      }
+    });
+    t.add(trunk2, crownI);
+    // den da (toro) quanh cac ngon den: thap, co o sang
+    const stoneM3 = new THREE.MeshLambertMaterial({ color: 0x7e8798, flatShading: true });
+    const winM = new THREE.MeshBasicMaterial({ color: 0xffc766 });
+    for (const [, lp] of map.lanterns) {
+      for (const a of [0.7, 3.8]) {
+        const x = lp[0] + Math.cos(a) * 4.2;
+        const z = lp[2] + Math.sin(a) * 4.2;
+        const y = map.ground(x, z);
+        if (y == null) continue;
+        const g2 = new THREE.Group();
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 0.9, 6), stoneM3);
+        base.position.y = 0.45;
+        const box = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.5, 0.55), stoneM3);
+        box.position.y = 1.15;
+        const win = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.26, 0.58), winM);
+        win.position.y = 1.15;
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(0.55, 0.38, 4), stoneM3);
+        roof.position.y = 1.6;
+        roof.rotation.y = Math.PI / 4;
+        g2.add(base, box, win, roof);
+        g2.position.set(x, y, z);
+        t.add(g2);
+      }
+    }
+  }
+  // da dang theo tung dem (chi hien thi): nam phat sang (moi dem), truc tre + ao sen (Dem 2), tru da do nat + bia da (Dem 3)
+  {
+    const far = (sp) => !pts.some((q2) => Math.hypot(q2[0] - sp[0], q2[2] - sp[2]) < 5) && !(night === 2 && onBridge(sp[0], sp[2]));
+    const mm = new THREE.Matrix4();
+    const qq = new THREE.Quaternion();
+    const mush = spots.filter((sp) => sp[3] > 0.62 && sp[3] < 0.72 && far(sp)).slice(0, 40);
+    const capI = new THREE.InstancedMesh(new THREE.SphereGeometry(0.34, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshBasicMaterial({ color: night === 2 ? 0x7fffd4 : night === 3 ? 0xff9bd8 : 0x9bd6ff }), mush.length);
+    const stemI = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.09, 0.4, 6), new THREE.MeshLambertMaterial({ color: 0xe8e0d0 }), mush.length);
+    mush.forEach((sp, i) => {
+      const k = 0.7 + rnd() * 1.1;
+      mm.compose(new THREE.Vector3(sp[0], sp[1] + 0.2 * k, sp[2]), qq.identity(), new THREE.Vector3(k, k, k));
+      stemI.setMatrixAt(i, mm);
+      mm.compose(new THREE.Vector3(sp[0], sp[1] + 0.38 * k, sp[2]), qq.identity(), new THREE.Vector3(k, k, k));
+      capI.setMatrixAt(i, mm);
+    });
+    t.add(capI, stemI);
+    if (night === 2) {
+      const bam = spots.filter((sp) => sp[3] > 0.45 && sp[3] < 0.6 && far(sp)).slice(0, 120);
+      const bI = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.09, 1, 6), new THREE.MeshLambertMaterial({ color: 0x86c06a, flatShading: true }), bam.length);
+      bam.forEach((sp, i) => {
+        const h = 4 + rnd() * 3.5;
+        mm.compose(new THREE.Vector3(sp[0], sp[1] + h / 2, sp[2]), qq.setFromEuler(new THREE.Euler((rnd() - 0.5) * 0.12, 0, (rnd() - 0.5) * 0.12)), new THREE.Vector3(1, h, 1));
+        bI.setMatrixAt(i, mm);
+      });
+      t.add(bI);
+      const pondM = new THREE.MeshBasicMaterial({ color: 0x1f5d8e, transparent: true, opacity: 0.55, depthWrite: false });
+      const lilyM = new THREE.MeshBasicMaterial({ color: 0x78e08f });
+      for (const sp of spots.filter((a) => a[3] > 0.3 && a[3] < 0.33 && !a[4] && far(a)).slice(0, 5)) {
+        const r = 2 + rnd() * 2;
+        const pond = new THREE.Mesh(new THREE.CircleGeometry(r, 24), pondM);
+        pond.rotation.x = -Math.PI / 2;
+        pond.position.set(sp[0], sp[1] + 0.05, sp[2]);
+        t.add(pond);
+        for (let j = 0; j < 4; j++) {
+          const lily = new THREE.Mesh(new THREE.CircleGeometry(0.35, 8), lilyM);
+          lily.rotation.x = -Math.PI / 2;
+          lily.position.set(sp[0] + (rnd() - 0.5) * r, sp[1] + 0.07, sp[2] + (rnd() - 0.5) * r);
+          t.add(lily);
+        }
+      }
+    }
+    if (night === 3) {
+      const stoneM2 = new THREE.MeshLambertMaterial({ color: 0x8b93a6, flatShading: true });
+      for (const sp of spots.filter((a) => a[3] > 0.45 && a[3] < 0.5 && !a[4] && far(a)).slice(0, 14)) {
+        const h = 1.2 + rnd() * 3.4;
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.5, h, 7), stoneM2);
+        col.position.set(sp[0], sp[1] + h / 2, sp[2]);
+        col.rotation.z = (rnd() - 0.5) * 0.15;
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.25, 1.1), stoneM2);
+        cap.position.set(sp[0], sp[1] + h + 0.12, sp[2]);
+        t.add(col, rnd() > 0.45 ? cap : new THREE.Object3D());
+      }
+    }
+  }
+  // cong da o diem xuat phat (hai tru, xa ngang, day den giay) + cot da co vong rune sang nhe
+  {
+    const stoneM = new THREE.MeshLambertMaterial({ color: 0x6d7585, flatShading: true });
+    const redM = new THREE.MeshLambertMaterial({ color: 0xb23a48, emissive: 0x6a1a24, emissiveIntensity: 0.25 });
+    const [gx, gy, gz] = map.start;
+    const gate = new THREE.Group();
+    for (const sx of [-1, 1]) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 4.4, 8), redM);
+      pillar.position.set(sx * 2.6, 2.2, 0);
+      const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.5, 8), stoneM);
+      foot.position.set(sx * 2.6, 0.25, 0);
+      gate.add(pillar, foot);
+    }
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.36, 0.5), redM);
+    beam.position.y = 4.4;
+    const beam2 = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.22, 0.4), redM);
+    beam2.position.y = 3.7;
+    gate.add(beam, beam2);
+    for (let i = 0; i < 5; i++) {
+      const lan = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffb347 }));
+      lan.scale.y = 1.25;
+      lan.position.set(-2 + i, 3.35, 0.05);
+      gate.add(lan);
+    }
+    gate.position.set(gx, gy, gz + 6);
+    gate.rotation.y = Math.PI;
+    t.add(gate);
+    const ringGeo = new THREE.RingGeometry(0.55, 0.7, 28);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x8fd6e6, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false });
+    for (const sp of spots.filter((s) => s[4] && s[3] > 0.45 && s[3] < 0.5).slice(0, 12)) {
+      const st = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.5, 1.7 + sp[3] * 2, 6), stoneM);
+      st.position.set(sp[0], sp[1] + 0.85 + sp[3], sp[2]);
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(sp[0], sp[1] + 0.06, sp[2]);
+      t.add(st, ring);
+    }
+  }
+  // suong troi thap: cac mang suong mem troi cham quanh dao
+  {
+    const mistMat = new THREE.SpriteMaterial({ map: glowTex, color: 0x9fb4d8, transparent: true, opacity: 0.16, depthWrite: false, fog: false });
+    const mist = [];
+    for (let i = 0; i < 34; i++) {
+      const sp = new THREE.Sprite(mistMat);
+      const x = x0 + rnd() * (x1 - x0);
+      const z = -zr + rnd() * 2 * zr;
+      const y = map.ground(x, z);
+      sp.position.set(x, (y ?? 0) + 0.9, z);
+      const w = 9 + rnd() * 9;
+      sp.scale.set(w, w * 0.32, 1);
+      sp.userData = { x, z, ph: rnd() * 6.28, sp: 0.15 + rnd() * 0.25 };
+      mist.push(sp);
+      t.add(sp);
+    }
+    t.userData.mist = mist;
+  }
   // ben da/vien phat sang quanh mep dao de de nhin ranh gioi
   for (const sp of spots.filter((s) => s[4] && s[3] > 0.8 && s[3] < 0.92).slice(0, 40)) {
     const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 6, 5), new THREE.MeshBasicMaterial({ color: 0xffd98a }));
@@ -515,7 +733,12 @@ function makeLantern() {
   halo.position.y = 3.4;
   halo.scale.set(6.5, 6.5, 1);
   g.add(pole, stone, lamp, core, cap, finial, tassel, halo, ring, dsc, bar, torn);
-  g.userData = { lampMat, coreMat, ringMat, discMat, lamp, cap, bar, barFill, barFillMat, torn, halo };
+  // cot sang: chum tia dung len troi khi den dang sang (chi hien thi)
+  const beamMat = new THREE.MeshBasicMaterial({ color: 0xffc866, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1.6, 26, 16, 1, true), beamMat);
+  beam.position.y = 16;
+  g.add(beam);
+  g.userData = { lampMat, coreMat, ringMat, discMat, lamp, cap, bar, barFill, barFillMat, torn, halo, beamMat };
   scene.add(g);
   return g;
 }
@@ -534,8 +757,45 @@ function makeShade() {
   const e2 = e1.clone();
   e1.position.set(-0.3, 0.2, 0.75);
   e2.position.set(0.3, 0.2, 0.75);
-  g.add(body, outline, tail, e1, e2);
-  g.userData = { bodyMat, eyeMat, lineMat };
+  // thiet ke rieng: than giot muc co xuc tu long thong, giot muc bay quanh, mat co quang
+  const tendrils = [];
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2;
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.2, 1.3, 7), bodyMat);
+    t.geometry.translate(0, -0.65, 0);
+    t.position.set(Math.cos(a) * 0.5, -0.55, Math.sin(a) * 0.5);
+    t.userData.phase = a;
+    tendrils.push(t);
+    g.add(t);
+  }
+  const drops = [];
+  for (let i = 0; i < 3; i++) {
+    const d = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), bodyMat);
+    d.userData.phase = (i / 3) * Math.PI * 2;
+    drops.push(d);
+    g.add(d);
+  }
+  const eyeGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: C.shadeLine, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  eyeGlow.position.set(0, 0.2, 0.8);
+  eyeGlow.scale.set(1.5, 0.9, 1);
+  // den long cam tay: can tre, long den giay, anh sang rieng; thanh trang thai phia tren (KHONG phai mau: loi khong co mau cho Bong Muc)
+  const lanPole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.5, 5), new THREE.MeshLambertMaterial({ color: 0x3a2a24 }));
+  lanPole.position.set(0.95, 0.35, 0.2);
+  const lanBody = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 10), new THREE.MeshBasicMaterial({ color: 0xc040ff }));
+  lanBody.scale.y = 1.25;
+  lanBody.position.set(0.95, 1.2, 0.2);
+  const lanGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xb050ff, transparent: true, opacity: 0.6, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  lanGlow.position.copy(lanBody.position);
+  lanGlow.scale.set(2.2, 2.2, 1);
+  const barBack = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.16), new THREE.MeshBasicMaterial({ color: 0x120a1e, transparent: true, opacity: 0.8, depthTest: false, fog: false }));
+  const barFill2 = new THREE.Mesh(new THREE.PlaneGeometry(1.44, 0.1), new THREE.MeshBasicMaterial({ color: 0xff4050, depthTest: false, fog: false }));
+  barBack.renderOrder = 998;
+  barFill2.renderOrder = 999;
+  const bar = new THREE.Group();
+  bar.position.y = 2.2;
+  bar.add(barBack, barFill2);
+  g.add(body, outline, tail, e1, e2, eyeGlow, lanPole, lanBody, lanGlow, bar);
+  g.userData = { bodyMat, eyeMat, lineMat, tendrils, drops, eyeGlow, lanGlow, bar, barFill2 };
   scene.add(g);
   return g;
 }
@@ -567,67 +827,329 @@ function makeCharm() {
   return g;
 }
 
+// vet bui sang sau chan May khi chay
+const TRAIL = 22;
+const trail = [];
+for (let i = 0; i < TRAIL; i++) {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffe9a8, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  sp.userData = { life: 0 };
+  sp.visible = false;
+  scene.add(sp);
+  trail.push(sp);
+}
+
+// ---------------------------------------------------------------- nhan vat 2D (ve bang canvas, thiet ke rieng): kiem khach non la, mat na, den long
+const swordTex = canvasTex(64, 256, (g) => {
+  g.lineJoin = "round";
+  g.beginPath(); g.moveTo(32, 6); g.lineTo(42, 40); g.lineTo(38, 196); g.lineTo(26, 196); g.lineTo(22, 40); g.closePath();
+  const gr = g.createLinearGradient(22, 0, 42, 0); gr.addColorStop(0, "#cfd8e8"); gr.addColorStop(0.5, "#ffffff"); gr.addColorStop(1, "#9fb0c8");
+  g.fillStyle = gr; g.fill(); g.lineWidth = 4; g.strokeStyle = "#1a1420"; g.stroke();
+  g.beginPath(); g.rect(14, 196, 36, 9); g.fillStyle = "#f2c14e"; g.fill(); g.stroke();
+  g.beginPath(); g.rect(26, 205, 12, 44); g.fillStyle = "#3a1f24"; g.fill(); g.stroke();
+}, [1, 1]);
+let ghostI = 0;
+let heroYaw = 0;
+// kiem xoay tao loc: 3 thanh kiem bay quanh + 5 vong loc ttang dan
+const blades = [];
+for (let i = 0; i < 3; i++) {
+  const b = new THREE.Sprite(new THREE.SpriteMaterial({ map: swordTex, transparent: true, depthWrite: false, fog: false, opacity: 0 }));
+  b.scale.set(0.55, 2.1, 1);
+  scene.add(b);
+  blades.push(b);
+}
+const twister = new THREE.Group();
+const twRings = [];
+for (let i = 0; i < 5; i++) {
+  const r = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06 + i * 0.012, 6, 36, Math.PI * 1.55), new THREE.MeshBasicMaterial({ color: i % 2 ? 0xffd27a : 0xfff3cf, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false }));
+  r.rotation.x = Math.PI / 2;
+  r.userData = { i };
+  twister.add(r);
+  twRings.push(r);
+}
+scene.add(twister);
+let slashDir = [0, 1];
+let slashDist = 6;
+const wave = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.12, 6, 30, Math.PI * 0.95), new THREE.MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false }));
+scene.add(wave);
+// dom dom trong den long (so luong theo ap luc mang theo) va tia sang bay ve den khi nhat
+const INNER = 8;
+const inner = [];
+for (let i = 0; i < INNER; i++) {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xfff1a8, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  sp.scale.set(0.34, 0.34, 1);
+  scene.add(sp);
+  inner.push(sp);
+}
+const STREAKS = 12;
+const streaks = [];
+for (let i = 0; i < STREAKS; i++) {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffe58a, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  sp.userData = { t: 1, from: new THREE.Vector3() };
+  sp.visible = false;
+  scene.add(sp);
+  streaks.push(sp);
+}
+let streakI = 0;
+const lanternWorld = new THREE.Vector3();
+const PETALS = 90;
+const petalGeo = new THREE.BufferGeometry();
+petalGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(PETALS * 3), 3));
+const petals = new THREE.Points(petalGeo, new THREE.PointsMaterial({ color: 0xffc2d9, map: glowTex, size: 7, sizeAttenuation: false, transparent: true, opacity: 0.9, depthWrite: false, fog: false }));
+petals.frustumCulled = false;
+scene.add(petals);
+const SLASH_LEN = 0.6;
+let slashT = 0;
+let dashT = 0;
+let trailI = 0;
+let trailT = 0;
 const player = new THREE.Group();
+const GHOSTS = 8;
+const ghosts = [];
 {
+  // ---- Nguoi Gac Den: nhan vat 3D to vẽ tay (hand-painted) kieu game MOBA: dau to, khoi ro, vien muc, toi sang theo bac
   const rig = new THREE.Group();
-  const L = (c, e = 0) => new THREE.MeshLambertMaterial({ color: c, emissive: c, emissiveIntensity: e });
-  const cloak = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.52, 0.95, 18), L(C.may, 0.08));
-  cloak.position.y = 0.62;
-  const sash = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.42, 0.14, 18), L(C.red, 0.1));
-  sash.position.y = 0.72;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.31, 18, 14), L(0xf1d2b3, 0.1));
-  head.position.y = 1.4;
-  const eyeM = new THREE.MeshBasicMaterial({ color: 0x1b1420 });
-  const e1 = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), eyeM);
-  e1.position.set(-0.11, 1.42, 0.28);
-  const e2 = e1.clone();
-  e2.position.x = 0.11;
-  const cheekM = new THREE.MeshBasicMaterial({ color: 0xf59aa0 });
-  const c1 = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), cheekM);
-  c1.scale.set(1.3, 0.8, 0.5);
-  c1.position.set(-0.19, 1.33, 0.25);
-  const c2 = c1.clone();
-  c2.position.x = 0.19;
-  const hat = new THREE.Mesh(new THREE.ConeGeometry(0.95, 0.5, 26), L(0xd9c28a, 0.06));
-  hat.position.y = 1.82;
-  const hatTop = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), L(C.red, 0.2));
-  hatTop.position.y = 2.1;
-  const strap = new THREE.Mesh(new THREE.TorusGeometry(0.29, 0.02, 4, 16, Math.PI), L(C.red));
-  strap.position.set(0, 1.3, 0.02);
-  strap.rotation.x = Math.PI;
-  const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.1, 8, 18), L(C.red, 0.1));
-  scarf.rotation.x = Math.PI / 2;
-  scarf.position.y = 1.13;
-  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.7, 0.05), L(C.red, 0.1));
-  tail.geometry.translate(0, -0.35, 0);
-  tail.position.set(-0.12, 1.15, -0.36);
-  const footM = L(0x4a3322);
-  const f1 = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 6), footM);
-  f1.scale.set(1, 0.6, 1.4);
-  f1.position.set(-0.17, 0.08, 0.08);
-  const f2 = f1.clone();
-  f2.position.x = 0.17;
-  const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.55, 6), L(C.may, 0.05));
-  armR.position.set(0.38, 1.0, 0.12);
-  armR.rotation.z = -1.0;
-  armR.rotation.x = -0.35;
-  const armL = armR.clone();
-  armL.position.x = -0.38;
-  armL.rotation.z = 0.5;
-  armL.rotation.x = 0;
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.7, 6), L(C.wood));
-  pole.position.set(0.58, 1.0, 0.2);
-  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.26, 14, 12), new THREE.MeshBasicMaterial({ color: C.moteCore }));
-  orb.position.set(0.58, 1.95, 0.2);
+  rig.scale.setScalar(1.65);
+  const toonGrad = new THREE.DataTexture(Uint8Array.from([90, 150, 210, 255]), 4, 1, THREE.RedFormat);
+  toonGrad.minFilter = toonGrad.magFilter = THREE.NearestFilter;
+  toonGrad.needsUpdate = true;
+  const paint = (geo, top, bot) => {
+    geo.computeBoundingBox();
+    const y0 = geo.boundingBox.min.y;
+    const h = Math.max(1e-4, geo.boundingBox.max.y - y0);
+    const ct = new THREE.Color(top);
+    const cb = new THREE.Color(bot);
+    const pos = geo.attributes.position;
+    const col = new Float32Array(pos.count * 3);
+    const c = new THREE.Color();
+    for (let i = 0; i < pos.count; i++) {
+      c.copy(cb).lerp(ct, (pos.getY(i) - y0) / h);
+      col.set([c.r, c.g, c.b], i * 3);
+    }
+    geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    return geo;
+  };
+  const toon = (top, bot = top, side = THREE.FrontSide) => ({ geo: null, mat: new THREE.MeshToonMaterial({ color: 0xffffff, vertexColors: true, gradientMap: toonGrad, emissive: 0x2a2a3c, emissiveIntensity: 0.55, side }), top, bot });
+  const outlineMat = new THREE.MeshBasicMaterial({ color: 0x120c18, side: THREE.BackSide, fog: false });
+  outlineMat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader.replace("#include <begin_vertex>", "vec3 transformed = position + normal * 0.022;");
+  };
+  const solid = []; // luoi dung cho tan anh
+  const mk = (geo, top, bot, outline = true, side = THREE.FrontSide) => {
+    const t = toon(top, bot, side);
+    paint(geo, top, bot);
+    const m = new THREE.Mesh(geo, t.mat);
+    if (outline) {
+      const o = new THREE.Mesh(geo, outlineMat);
+      o.userData.outline = true;
+      m.add(o);
+    }
+    solid.push(m);
+    return m;
+  };
+  const flat = (geo, color) => {
+    const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color }));
+    solid.push(m);
+    return m;
+  };
+  const cap = (r, len, seg = 10) => new THREE.CapsuleGeometry(r, len, 4, seg);
+  const skin = [0xf2c9a0, 0xd99c6e];
+  const coat = [0xe8a950, 0xb8732a];
+  const green = [0x3f8a6a, 0x23513f];
+  const pants = [0x35506c, 0x233649];
+  const brown = [0x7a4a2c, 0x3d2216];
+  // chan (xoay quanh hong)
+  const legs = [-1, 1].map((sx) => {
+    const g = new THREE.Group();
+    g.position.set(sx * 0.13, 0.68, 0);
+    const lg = cap(0.105, 0.32);
+    lg.translate(0, -0.28, 0);
+    g.add(mk(lg, pants[0], pants[1]));
+    const bg = new THREE.SphereGeometry(0.135, 12, 9);
+    bg.scale(1, 0.75, 1.5);
+    bg.translate(0, -0.6, 0.05);
+    g.add(mk(bg, 0x5a3a28, 0x2b1a12));
+    const wrap = new THREE.Mesh(new THREE.TorusGeometry(0.108, 0.02, 5, 14), new THREE.MeshBasicMaterial({ color: 0xeadfbf }));
+    wrap.rotation.x = Math.PI / 2;
+    wrap.position.y = -0.46;
+    g.add(wrap);
+    rig.add(g);
+    return g;
+  });
+  // than: ao ngan cam + vat ao kem + dai + khan co
+  const torso = mk(new THREE.CylinderGeometry(0.25, 0.33, 0.56, 16), coat[0], coat[1]);
+  torso.position.y = 0.98;
+  const skirt = mk(new THREE.CylinderGeometry(0.33, 0.43, 0.24, 16, 1, true), 0xf6e8bb, 0xcdb680, false, THREE.DoubleSide);
+  skirt.position.y = 0.7;
+  const belt = mk(new THREE.TorusGeometry(0.3, 0.05, 6, 20), brown[0], brown[1], false);
+  belt.rotation.x = Math.PI / 2;
+  belt.position.y = 0.8;
+  const buckle = mk(new THREE.SphereGeometry(0.06, 8, 6), 0xffd96a, 0xd9a52e, false);
+  buckle.position.set(0, 0.8, 0.31);
+  const collar = mk(new THREE.TorusGeometry(0.24, 0.07, 8, 18), 0xf6e8bb, 0xdcc88e, false);
+  collar.rotation.x = Math.PI / 2;
+  collar.position.y = 1.26;
+  const charm = flat(new THREE.SphereGeometry(0.055, 8, 6), 0xffb347);
+  charm.position.set(0.2, 0.62, 0.34);
+  // dau
+  const head = mk(new THREE.SphereGeometry(0.3, 20, 16), skin[0], skin[1]);
+  head.position.y = 1.58;
+  const eyeG = new THREE.SphereGeometry(0.055, 10, 8);
+  eyeG.scale(1, 1.3, 0.5);
+  const eyes = [-1, 1].map((sx) => {
+    const e = flat(eyeG, 0x1a1420);
+    e.position.set(sx * 0.115, 1.59, 0.275);
+    const h = flat(new THREE.SphereGeometry(0.016, 6, 5), 0xffffff);
+    h.position.set(sx * 0.115 + 0.012, 1.612, 0.3);
+    rig.add(e, h);
+    return e;
+  });
+  const brows = [-1, 1].map((sx) => {
+    const b = flat(new THREE.BoxGeometry(0.11, 0.028, 0.02), 0x2a1a16);
+    b.position.set(sx * 0.115, 1.675, 0.27);
+    b.rotation.z = sx * -0.28;
+    b.rotation.y = sx * 0.3;
+    rig.add(b);
+    return b;
+  });
+  const scar = flat(new THREE.BoxGeometry(0.1, 0.018, 0.01), 0xb5473b);
+  scar.position.set(0.14, 1.5, 0.275);
+  scar.rotation.z = 0.7;
+  const mouth = flat(new THREE.BoxGeometry(0.07, 0.014, 0.01), 0x7a3a34);
+  mouth.position.set(-0.02, 1.47, 0.292);
+  // toc: nua sau dau + duoi toc
+  const hair = mk(new THREE.SphereGeometry(0.325, 16, 12, Math.PI, Math.PI), 0x4a3028, 0x1f1210, false, THREE.DoubleSide);
+  hair.position.set(0, 1.6, -0.02);
+  const pony = new THREE.Group();
+  pony.position.set(0, 1.66, -0.3);
+  const pg = cap(0.07, 0.34);
+  pg.translate(0, -0.24, 0);
+  pony.add(mk(pg, 0x4a3028, 0x1f1210));
+  const pt = flat(new THREE.TorusGeometry(0.07, 0.02, 5, 10), 0xe9573f);
+  pt.rotation.x = Math.PI / 2;
+  pony.add(pt);
+  // non la + bang xanh
+  const hat = new THREE.Group();
+  hat.position.set(0, 1.9, -0.06);
+  hat.rotation.x = -0.3;
+  const hatCone = mk(new THREE.ConeGeometry(0.6, 0.34, 26), 0xf0d98e, 0xc79f52);
+  hatCone.position.y = 0.17;
+  const hatBand = mk(new THREE.TorusGeometry(0.6, 0.035, 6, 32), green[0], green[1], false);
+  hatBand.rotation.x = Math.PI / 2;
+  const hatTop = mk(new THREE.SphereGeometry(0.07, 8, 6), 0xffd96a, 0xd9a52e, false);
+  hatTop.position.y = 0.36;
+  hat.add(hatCone, hatBand, hatTop);
+  for (const k of [0.25, 0.5, 0.75]) {
+    const wr = new THREE.Mesh(new THREE.TorusGeometry(0.6 * (1 - k) + 0.012, 0.012, 4, 30), new THREE.MeshBasicMaterial({ color: 0xa8803c }));
+    wr.rotation.x = Math.PI / 2;
+    wr.position.y = k * 0.34 + 0.01;
+    hat.add(wr);
+  }
+  // ao choang xanh la sau lung
+  const capeG = new THREE.CylinderGeometry(0.28, 0.5, 1.0, 18, 1, true, Math.PI - 1.0, 2.0);
+  capeG.translate(0, -0.5, 0);
+  const cape = new THREE.Group();
+  cape.position.set(0, 1.3, -0.04);
+  cape.add(mk(capeG, green[0], green[1], false, THREE.DoubleSide));
+  // kiem deo lung
+  const sheath = new THREE.Group();
+  sheath.position.set(0, 1.0, -0.3);
+  sheath.rotation.z = 0.75;
+  const sh = cap(0.05, 0.85);
+  sheath.add(mk(sh, brown[0], brown[1]));
+  const hilt = mk(cap(0.032, 0.2), 0xffd96a, 0x8a5a24, false);
+  hilt.position.y = 0.62;
+  const guard = flat(new THREE.BoxGeometry(0.2, 0.035, 0.05), 0xffd96a);
+  guard.position.y = 0.5;
+  sheath.add(hilt, guard);
+  // tay trai (vung kiem) va tay phai (cam can den)
+  const armL = new THREE.Group();
+  armL.position.set(-0.34, 1.28, 0);
+  const alg = cap(0.075, 0.28);
+  alg.translate(0, -0.2, 0);
+  armL.add(mk(alg, coat[0], coat[1]));
+  const handL = mk(new THREE.SphereGeometry(0.075, 8, 6), skin[0], skin[1], false);
+  handL.position.y = -0.46;
+  armL.add(handL);
+  const blade = new THREE.Group(); // thanh kiem cam tay khi chem
+  const bg2 = new THREE.BoxGeometry(0.08, 1.35, 0.02);
+  bg2.translate(0, -1.2, 0);
+  const bm = new THREE.Mesh(bg2, new THREE.MeshBasicMaterial({ color: 0xfff1c9 }));
+  const bgd = flat(new THREE.BoxGeometry(0.26, 0.05, 0.06), 0xffd96a);
+  bgd.position.y = -0.5;
+  blade.add(bm, bgd);
+  blade.position.y = -0.46;
+  blade.visible = false;
+  armL.add(blade);
+  const shR = new THREE.Vector3(0.34, 1.28, 0);
+  const handR = new THREE.Vector3(0.56, 1.1, 0.34);
+  const armR = new THREE.Group();
+  armR.position.copy(shR);
+  const arg = cap(0.075, 0.2);
+  arg.rotateX(Math.PI / 2);
+  arg.translate(0, 0, 0.18);
+  armR.add(mk(arg, coat[0], coat[1]));
+  armR.lookAt(handR.clone().add(new THREE.Vector3(0, 0, 0)));
+  armR.updateMatrix();
+  const handRM = mk(new THREE.SphereGeometry(0.08, 8, 6), skin[0], skin[1], false);
+  handRM.position.copy(handR);
+  // can tre + den long
+  const poleG = new THREE.CylinderGeometry(0.03, 0.036, 1.95, 7);
+  const pole = mk(poleG, 0xb98a55, 0x7a5430, false);
+  pole.position.set(0.56, 1.1, 0.34);
+  for (const y of [-0.5, 0.1, 0.7]) {
+    const n = flat(new THREE.TorusGeometry(0.038, 0.01, 4, 10), 0x5c3b20);
+    n.rotation.x = Math.PI / 2;
+    n.position.y = y;
+    pole.add(n);
+  }
+  const lan = new THREE.Group();
+  lan.position.set(0.56, 2.0, 0.34);
+  const hook = flat(new THREE.TorusGeometry(0.06, 0.012, 4, 10, Math.PI), 0x3a2a20);
+  hook.position.y = 0.37;
+  const shellG = new THREE.SphereGeometry(0.27, 16, 12);
+  shellG.scale(1, 1.2, 1);
+  const shell = new THREE.Mesh(shellG, new THREE.MeshBasicMaterial({ color: 0xffc866, transparent: true, opacity: 0.92, fog: false }));
+  const shellOl = new THREE.Mesh(shellG, outlineMat);
+  shellOl.userData.outline = true;
+  shell.add(shellOl);
+  for (let i = 0; i < 3; i++) {
+    const rib = new THREE.Mesh(new THREE.TorusGeometry(0.272, 0.011, 4, 24), new THREE.MeshBasicMaterial({ color: 0x5a2a14 }));
+    rib.scale.set(1, 1.2, 1);
+    rib.rotation.y = (i * Math.PI) / 3;
+    lan.add(rib);
+  }
+  const capT = mk(new THREE.CylinderGeometry(0.12, 0.15, 0.06, 12), 0x8a5a34, 0x4a2f22, false);
+  capT.position.y = 0.33;
+  const capB = mk(new THREE.CylinderGeometry(0.17, 0.12, 0.07, 12), 0x4a2f22, 0x2a1810, false);
+  capB.position.y = -0.33;
+  const tas = flat(new THREE.ConeGeometry(0.05, 0.26, 6), 0xe9573f);
+  tas.geometry.translate(0, -0.13, 0);
+  tas.rotation.x = Math.PI;
+  tas.position.y = -0.36;
+  tas.rotation.x = 0;
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 10), new THREE.MeshBasicMaterial({ color: C.moteCore, fog: false }));
   const orbHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-  orbHalo.position.copy(orb.position);
   orbHalo.scale.set(2.4, 2.4, 1);
-  const lamp = new THREE.PointLight(0xffe58a, 6, 16, 1.6);
-  lamp.position.set(0.58, 1.9, 0.2);
-  rig.add(cloak, sash, head, e1, e2, c1, c2, hat, hatTop, strap, scarf, tail, f1, f2, armR, armL, pole, orb, orbHalo, lamp);
+  const lamp = new THREE.PointLight(0xffd98a, 6, 16, 1.6);
+  lan.add(hook, shell, capT, capB, tas, orb, orbHalo, lamp);
+  rig.add(torso, skirt, belt, buckle, collar, charm, head, scar, mouth, hair, pony, hat, cape, sheath, armL, armR, handRM, pole, lan);
   player.add(rig);
-  player.userData = { orb, lamp, rig, tail, orbHalo, f1, f2, armL };
+  player.userData = { orb, lamp, rig, lan, orbHalo, legs, armL, armR, cape, pony, hat, sheath, blade, tas, eyes, solid };
   scene.add(player);
+  // tan anh khi luot: ban chup tu the, mau vang cam, mo dan
+  for (let i = 0; i < GHOSTS; i++) {
+    const gm = new THREE.MeshBasicMaterial({ color: 0xffc766, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, side: THREE.DoubleSide });
+    const gg = new THREE.Group();
+    gg.userData = { life: 0, parts: solid.map((src) => {
+      const m = new THREE.Mesh(src.geometry, gm);
+      m.matrixAutoUpdate = false;
+      gg.add(m);
+      return { src, m };
+    }), mat: gm };
+    gg.visible = false;
+    scene.add(gg);
+    ghosts.push(gg);
+  }
 }
 
 // la gio (chi hien thi): xuat hien khi gio canh bao/dang thoi
@@ -856,8 +1378,11 @@ let lastTenShown = false;
 let windWarnedFor = -1;
 let alertShade = null;
 const lowFuelSeen = new Set();
+const arrowPool = [];
 function caption(text, secs = 3.5) {
   if (!settings.captions) return;
+  const last = subsList.at(-1);
+  if (last && last.text === text && last.until > performance.now() + (secs - 2) * 1000) return; // khong lap lai cung mot dong
   subsList.push({ text, until: performance.now() + secs * 1000 });
   if (subsList.length > 3) subsList.shift();
   renderSubs();
@@ -889,7 +1414,8 @@ function edgeArrow(el, wx, wy, wz) {
   el.style.display = "block";
   el.style.left = `${((x + 1) / 2) * innerWidth}px`;
   el.style.top = `${((1 - y) / 2) * innerHeight}px`;
-  el.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
+  el.dataset.rot = String(Math.atan2(-y, x));
+  if (el.id === "arrow2") el.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
 }
 let hintTimer = 0;
 function banner(text, cls = "") {
@@ -971,10 +1497,33 @@ function updateHud(time) {
       else if (!weak) lowFuelSeen.delete(l.id);
     }
   }
-  const a2 = $("arrow2");
-  const sh = alertShade && performance.now() < alertShade.until ? g.shades.find((x) => x.id === alertShade.id) : null;
-  if (sh && g.state === "playing") edgeArrow(a2, sh.pos[0], sh.pos[1] + 1, sh.pos[2]);
-  else a2.style.display = "none";
+  {
+    // mui ten bao quai: moi Bong Muc ngoai man hinh co mot mui ten lon o mep, mau theo trang thai, kem khoang cach (m)
+    const a2 = $("arrow2");
+    a2.style.display = "none";
+    const live = g.state === "playing" ? g.shades.filter((x) => x.state !== "spawning" && Math.hypot(x.pos[0] - g.player.pos[0], x.pos[2] - g.player.pos[2]) < 45) : [];
+    while (arrowPool.length < Math.min(live.length, 8)) {
+      const el = document.createElement("div");
+      el.className = "sarrow";
+      el.innerHTML = '<b>➤</b><i></i>';
+      document.body.appendChild(el);
+      arrowPool.push(el);
+    }
+    const P0 = g.player.pos;
+    live.sort((a, b) => Math.hypot(a.pos[0] - P0[0], a.pos[2] - P0[2]) - Math.hypot(b.pos[0] - P0[0], b.pos[2] - P0[2]));
+    arrowPool.forEach((el, i) => {
+      const x = live[i];
+      if (!x) return void (el.style.display = "none");
+      edgeArrow(el, x.pos[0], x.pos[1] + 1, x.pos[2]);
+      if (el.style.display === "none") return;
+      const d = Math.hypot(x.pos[0] - P0[0], x.pos[2] - P0[2]);
+      const hot = x.state === "chase" || x.state === "drain";
+      el.classList.toggle("hot", hot);
+      el.classList.toggle("stun", x.state === "stunned");
+      el.querySelector("i").textContent = `${Math.round(d)} m`;
+      el.querySelector("b").style.transform = `rotate(${el.dataset.rot || 0}rad)`;
+    });
+  }
   // mui ten toi den chua sang gan nhat khi ngoai man hinh
   const un = g.lanterns.filter((l) => !l.lit || l.fuelU < 60 * 30).sort((a, b) => Math.hypot(a.pos[0] - P.pos[0], a.pos[2] - P.pos[2]) - Math.hypot(b.pos[0] - P.pos[0], b.pos[2] - P.pos[2]))[0];
   const arrow = $("arrow");
@@ -1000,6 +1549,19 @@ function updateHud(time) {
 function show(html, def = null) {
   $("card").innerHTML = html;
   $("screen").classList.remove("hidden");
+  $("screen").classList.toggle("hero", html.includes("Mây và ba hòn đảo"));
+  if (!$("screen").querySelector(".fl")) {
+    // den long bay len o man hinh chinh (CSS thuan; tat khi bat Giam chuyen dong)
+    for (let i = 0; i < 12; i++) {
+      const d = document.createElement("div");
+      d.className = "fl";
+      d.style.left = `${5 + ((i * 83) % 90)}%`;
+      d.style.animationDuration = `${11 + ((i * 7) % 9)}s`;
+      d.style.animationDelay = `${-((i * 5) % 14)}s`;
+      d.style.transform = `scale(${0.7 + (i % 4) * 0.2})`;
+      $("screen").prepend(d);
+    }
+  }
   document.body.classList.toggle("nohud", mode === "menu" || mode === "intro"); // menu/gioi thieu: an HUD cua van truoc
   screenDefault = def;
   for (const b of $("card").querySelectorAll("button[data-act]")) b.onclick = () => ACT[b.dataset.act]?.();
@@ -1044,12 +1606,14 @@ function toMenu() {
   if (!game) newGame(1);
   show(
     `<h1>Đảo Đèn Lồng</h1><h2>Mây và ba hòn đảo</h2>
-     <p>Mây phải thắp sáng những ngọn đèn trên ba hòn đảo trước bình minh.</p>
+     <p>Một kiếm khách đội nón, đeo mặt nạ, cầm đèn lồng giữa rừng thông trên đảo giữa biển đêm. Thu đom đóm, thắp sáng đèn, cầm cự tới bình minh.</p>
+     <div class="chips"><span>🏮 3 Đêm</span><span>🌪 Chém lốc</span><span>👻 Bóng Mực</span><span>🏆 Xếp hạng</span></div>
      <button class="primary" data-act="play">Bắt đầu ▶</button>
      <button data-act="nights">Chọn đêm</button>
      <button data-act="leaderboard">Bảng xếp hạng</button>
      <button data-act="help">Hướng dẫn</button>
-     <button data-act="settings">Cài đặt</button>`,
+     <button data-act="settings">Cài đặt</button>
+     <p class="hint">Nhấn <kbd>Enter</kbd> để chơi · cuộn chuột để zoom · bản 1.0.0</p>`,
     ACT.play,
   );
 }
@@ -1360,7 +1924,20 @@ function onEvents(events) {
   const P = game.player;
   for (const e of events) {
     switch (e.name) {
-      case "mote_picked": sfx.pickup(e.data.carried); break;
+      case "mote_picked": {
+        sfx.pickup(e.data.carried);
+        let bv = null;
+        let bd = 9;
+        for (const v of views.motes.values()) {
+          const d = Math.hypot(v.position.x - game.player.pos[0], v.position.z - game.player.pos[2]);
+          if (d < bd) (bd = d), (bv = v);
+        }
+        const st = streaks[streakI++ % STREAKS];
+        st.userData.from.copy(bv ? bv.position : new THREE.Vector3(game.player.pos[0], game.player.pos[1] + 1, game.player.pos[2]));
+        st.userData.t = 0;
+        st.visible = true;
+        break;
+      }
       case "deposit": sfx.deposit(); break;
       case "lantern_lit": {
         const l = game.lanterns.find((x) => x.id === e.data.lantern_id);
@@ -1374,10 +1951,29 @@ function onEvents(events) {
       case "lantern_out": sfx.lose(); banner(`⚠ Đèn ${e.data.lantern_id} đã tắt!`, "danger"); caption(`⚠ Đèn ${e.data.lantern_id} đã tắt`); break;
       case "fuel_drain": banner(`⚠ Bóng Mực đang hút dầu đèn ${e.data.lantern_id}!`, "danger"); break;
       case "pulse":
+        slashT = SLASH_LEN;
+        {
+          // chem ve phia Bong Muc gan nhat (trong 18 m); khong co thi chem ve huong dang quay
+          const P1 = game.player.pos;
+          let best = null;
+          let bd = 18;
+          for (const sh of game.shades) {
+            const d = Math.hypot(sh.pos[0] - P1[0], sh.pos[2] - P1[2]);
+            if (d < bd) (bd = d), (best = sh);
+          }
+          if (best) {
+            slashDir = [(best.pos[0] - P1[0]) / bd, (best.pos[2] - P1[2]) / bd];
+            slashDist = Math.min(bd, 10);
+          } else {
+            const th = (yaw * Math.PI) / 180;
+            slashDir = [Math.sin(th), Math.cos(th)];
+            slashDist = 6;
+          }
+        }
         addRing(P.pos[0], P.pos[1], P.pos[2], T.pulse_radius, C.moteHalo, 0.5);
         sfx.pulse();
         break;
-      case "dash": sfx.dash(); addBurst(P.pos[0], P.pos[1] + 0.8, P.pos[2], C.wind, 8); break;
+      case "dash": dashT = 0.3; sfx.dash(); addBurst(P.pos[0], P.pos[1] + 0.8, P.pos[2], C.wind, 8); break;
       case "charm_picked": sfx.charm(); banner("🧣 Bùa Gió! Chạy nhanh và lướt liên tục"); break;
       case "drifter_steal": sfx.steal(); banner(`Gió Lạc cuỗm ${e.data.amount} ánh sáng!`); break;
       case "drifter_drop": banner(`Ánh sáng rơi ra: ${e.data.amount}`); break;
@@ -1418,7 +2014,13 @@ function syncViews(time) {
     if (!v) views.motes.set(m.id, (v = makeMote()));
     const flicker = m.ttl != null && m.ttl < 120 && Math.floor(time * 10) % 2 === 0;
     v.visible = !flicker;
-    v.position.set(m.pos[0], m.pos[1] + 0.9 + Math.sin(time * 2 + m.pos[0]) * 0.18, m.pos[2]);
+    {
+      const dx = game.player.pos[0] - m.pos[0];
+      const dz = game.player.pos[2] - m.pos[2];
+      const d = Math.hypot(dx, dz);
+      const pull = d < 2.6 && d > 0.01 ? (1 - d / 2.6) * Math.min(0.9, d) * 0.7 : 0; // vong hut hien thi, khong doi luat nhat
+      v.position.set(m.pos[0] + (dx / (d || 1)) * pull, m.pos[1] + 0.9 + Math.sin(time * 2 + m.pos[0]) * 0.18 * (1 - pull), m.pos[2] + (dz / (d || 1)) * pull);
+    }
   }
   for (const [id, v] of views.motes) if (!alive.has(id)) (scene.remove(v), views.motes.delete(id));
   const aliveS = new Set();
@@ -1435,6 +2037,27 @@ function syncViews(time) {
     v.userData.lineMat.color.setHex(shadeLineHex());
     if (s.state === "drain") v.scale.setScalar(1 + Math.sin(time * 10) * 0.08);
     v.rotation.y = Math.atan2(g.player.pos[0] - s.pos[0], g.player.pos[2] - s.pos[2]);
+    {
+      const u = v.userData;
+      const calm = settings.reduceMotion ? 0.3 : 1;
+      for (const t of u.tendrils) {
+        t.rotation.x = Math.sin(time * 4 + t.userData.phase * 2) * 0.35 * calm;
+        t.rotation.z = Math.cos(time * 3.2 + t.userData.phase) * 0.35 * calm;
+      }
+      for (const d of u.drops) {
+        const a = time * 1.6 + d.userData.phase;
+        d.position.set(Math.cos(a) * 1.25, 0.5 + Math.sin(a * 2) * 0.35, Math.sin(a) * 1.25);
+      }
+      u.lanGlow.material.opacity = 0.45 + 0.2 * Math.sin(time * 5 + s.pos[0]);
+      // thanh trang thai: do day = dang truy duoi / hut dau; xanh tim giam dan = choang con lai; xam = lang thang
+      u.bar.quaternion.copy(camera.quaternion);
+      const fillW = stunned ? Math.max(0.02, s.ticks / WORLD.pulse_stun_ticks) : s.state === "spawning" ? 0.02 : 1;
+      u.barFill2.scale.x = fillW;
+      u.barFill2.position.x = -(1 - fillW) * 0.72;
+      u.barFill2.material.color.setHex(stunned ? 0x6fd0ff : s.state === "chase" || s.state === "drain" ? 0xff4050 : 0x8a8a9a);
+      u.eyeGlow.material.color.setHex(stunned ? C.moteCore : shadeLineHex());
+      u.eyeGlow.material.opacity = stunned ? 0.2 : 0.45 + 0.15 * Math.sin(time * 6);
+    }
   }
   for (const [id, v] of views.shades) if (!aliveS.has(id)) (scene.remove(v), views.shades.delete(id));
   const aliveD = new Set();
@@ -1472,6 +2095,7 @@ function syncViews(time) {
     u.lamp.rotation.z = l.lit ? 0 : 0.12;
     u.cap.position.y = l.lit ? 4.2 : 4.0;
     u.torn.visible = !l.lit;
+    u.beamMat.opacity = BENCH ? 0 : l.lit ? (blinkOff ? 0.02 : 0.05 + 0.07 * (fuel / T.fuel_max) + (settings.reduceMotion ? 0 : Math.sin(time * 2 + i) * 0.012)) : 0;
     u.halo.material.opacity = l.lit ? (blinkOff ? 0.08 : 0.35 + 0.35 * (fuel / T.fuel_max)) : 0;
     u.halo.scale.setScalar(l.lit ? 5.5 + Math.sin(time * 4 + i) * 0.3 : 5);
     u.bar.visible = l.lit;
@@ -1483,22 +2107,175 @@ function syncViews(time) {
   });
   const P = g.player;
   player.position.set(P.pos[0], P.pos[1], P.pos[2]);
+  {
+    const mist = terrain?.userData.props?.userData.mist;
+    if (mist && !settings.reduceMotion) for (const m of mist) m.position.x = m.userData.x + Math.sin(time * m.userData.sp + m.userData.ph) * 3;
+  }
+  {
+    const spd = Math.hypot(P.vel[0], P.vel[2]);
+    trailT += 1;
+    if (spd > 3 && P.grounded && trailT % 3 === 0 && !settings.reduceMotion) {
+      const sp = trail[trailI++ % TRAIL];
+      sp.position.set(P.pos[0] + (Math.random() - 0.5) * 0.3, P.pos[1] + 0.12, P.pos[2] + (Math.random() - 0.5) * 0.3);
+      sp.userData.life = 1;
+      sp.userData.big = 1;
+      sp.material.color.setHex(0xffe9a8);
+      sp.visible = true;
+    }
+    for (const sp of trail) {
+      if (sp.userData.life > 0) {
+        sp.userData.life = Math.max(0, sp.userData.life - 0.028);
+        const k = sp.userData.life;
+        sp.material.opacity = k * 0.7;
+        sp.scale.setScalar((0.25 + (1 - k) * 0.7) * (sp.userData.big ?? 1));
+        sp.position.y += 0.012;
+        if (k === 0) sp.visible = false;
+      }
+    }
+  }
+  {
+    // timer chem / luot
+    const dtf = 1 / 60;
+    if (slashT > 0) slashT = Math.max(0, slashT - dtf);
+    if (dashT > 0) dashT = Math.max(0, dashT - dtf);
+    // luot: boc nhieu bong sang theo duong luot
+    if (dashT > 0 && !settings.reduceMotion) {
+      for (let i = 0; i < 2; i++) {
+        const sp = trail[trailI++ % TRAIL];
+        sp.position.set(P.pos[0] + (Math.random() - 0.5) * 0.4, P.pos[1] + 0.9 + (Math.random() - 0.5) * 0.6, P.pos[2] + (Math.random() - 0.5) * 0.4);
+        sp.material.color.setHex(0xffd27a);
+        sp.userData.life = 1;
+        sp.userData.big = 1.6;
+        sp.visible = true;
+      }
+    }
+  }
   player.visible = !(P.invuln > 0 && Math.floor(time * 14) % 2 === 0) && P.fallWait === 0;
   player.userData.lamp.intensity = 6 + P.carried * 1.6;
   player.userData.orb.scale.setScalar(0.7 + (P.carried / capacityNow(g)) * 0.9);
   const sp = Math.hypot(P.vel[0], P.vel[2]);
-  if (sp > 0.1) player.rotation.y = Math.atan2(P.vel[0], P.vel[2]);
   {
+    // ---- nhan vat 3D: quay mat theo huong chay (hoac huong chem), chay co nhip chan, ao choang bay, lac den
     const u = player.userData;
     const run = Math.min(1, sp / 6);
-    u.rig.position.y = run > 0.05 ? Math.abs(Math.sin(time * 11)) * 0.09 * run : Math.sin(time * 2) * 0.02;
-    u.rig.rotation.x = run * 0.12;
-    u.tail.rotation.x = 0.35 + run * 0.5 + Math.sin(time * 9) * 0.18 * run + Math.sin(time * 2) * 0.05;
-    u.tail.rotation.z = Math.sin(time * 7) * 0.2 * run;
-    u.f1.position.z = 0.08 + Math.sin(time * 11) * 0.12 * run;
-    u.f2.position.z = 0.08 - Math.sin(time * 11) * 0.12 * run;
-    u.armL.rotation.x = Math.sin(time * 11) * 0.5 * run;
+    const calm = settings.reduceMotion ? 0.3 : 1;
+    const kk = slashT > 0 ? 1 - slashT / SLASH_LEN : 0;
+    let want = heroYaw;
+    if (slashT > 0) want = Math.atan2(slashDir[0], slashDir[1]);
+    else if (sp > 0.6) want = Math.atan2(P.vel[0], P.vel[2]);
+    let dy = want - heroYaw;
+    dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+    heroYaw += dy * Math.min(1, (slashT > 0 ? 0.5 : 0.22));
+    player.rotation.y = heroYaw;
+    const ph = time * 11;
+    const bob = run > 0.05 ? Math.abs(Math.sin(ph)) * 0.1 * run * calm : Math.sin(time * 2) * 0.02 * calm;
+    u.rig.position.y = bob;
+    u.rig.rotation.x = run * 0.14 + (dashT > 0 ? 0.45 : 0);
+    // quay tron khi chem (kiem xoay tao loc)
+    const spinE = 1 - Math.pow(1 - kk, 2.2);
+    u.rig.rotation.y = slashT > 0 ? spinE * Math.PI * 6 : 0;
+    u.legs[0].rotation.x = Math.sin(ph) * 0.75 * run * calm;
+    u.legs[1].rotation.x = -Math.sin(ph) * 0.75 * run * calm;
+    u.cape.rotation.x = 0.12 + run * 0.6 + Math.sin(time * 9) * 0.1 * run + Math.sin(time * 2) * 0.03 + (slashT > 0 ? 0.7 : 0);
+    u.cape.rotation.z = Math.sin(time * 6) * 0.06 * run;
+    u.pony.rotation.x = 0.4 + run * 0.7 + Math.sin(time * 10) * 0.2 * run + Math.sin(time * 2.3) * 0.05;
+    u.pony.rotation.z = Math.sin(time * 7) * 0.25 * run;
+    u.hat.rotation.z = Math.sin(ph * 0.5) * 0.05 * run;
+    u.lan.rotation.z = Math.sin(time * 2.1) * 0.05 + (-Math.sin(ph) * 0.1 * run);
+    u.lan.rotation.x = Math.cos(time * 1.7) * 0.04 + run * 0.12;
+    u.tas.rotation.z = Math.sin(time * 5) * 0.3;
     u.orbHalo.scale.setScalar(2.2 + (P.carried / capacityNow(g)) * 2.2 + Math.sin(time * 5) * 0.12);
+    // tay trai: vung kiem khi chem, xoay tu nhien khi chay
+    if (slashT > 0) {
+      u.armL.rotation.set(-Math.PI / 2, 0, -0.1);
+      u.blade.visible = true;
+      u.sheath.visible = false;
+    } else {
+      u.armL.rotation.set(-Math.sin(ph) * 0.55 * run * calm, 0, 0.12);
+      u.blade.visible = false;
+      u.sheath.visible = true;
+    }
+    u.lan.getWorldPosition(lanternWorld);
+    {
+      const n = Math.round((P.carried / capacityNow(g)) * INNER);
+      inner.forEach((sp2, i) => {
+        const on = i < n;
+        const a = time * (1.4 + i * 0.17) + i * 2.1;
+        sp2.position.set(lanternWorld.x + Math.cos(a) * 0.12, lanternWorld.y - 0.04 + Math.sin(a * 1.7) * 0.14, lanternWorld.z + Math.sin(a) * 0.12);
+        sp2.material.opacity = on ? 0.8 + 0.2 * Math.sin(time * 6 + i) : 0;
+        sp2.visible = on && player.visible;
+      });
+      for (const st of streaks) {
+        if (st.userData.t < 1) {
+          st.userData.t = Math.min(1, st.userData.t + 0.07);
+          const k = st.userData.t;
+          const e2 = k * k * (3 - 2 * k);
+          st.position.lerpVectors(st.userData.from, lanternWorld, e2);
+          st.position.y += Math.sin(k * Math.PI) * 0.8;
+          st.material.opacity = 1 - k * 0.3;
+          st.scale.setScalar(0.5 * (1 - k * 0.6));
+          if (k >= 1) st.visible = false;
+        }
+      }
+    }
+    // tan anh khi luot: chup lai tu the 3D, vang cam, mo dan
+    if (dashT > 0 && !settings.reduceMotion && Math.floor(time * 60) % 2 === 0) {
+      const gg = ghosts[ghostI++ % GHOSTS];
+      player.updateWorldMatrix(true, true);
+      for (const { src, m } of gg.userData.parts) {
+        src.updateWorldMatrix(true, false);
+        m.matrix.copy(src.matrixWorld);
+        m.matrixWorldNeedsUpdate = true;
+      }
+      gg.userData.life = 1;
+      gg.visible = true;
+    }
+    for (const gg of ghosts) {
+      if (gg.userData.life > 0) {
+        gg.userData.life = Math.max(0, gg.userData.life - 0.05);
+        gg.userData.mat.opacity = gg.userData.life * 0.4;
+        if (gg.userData.life === 0) gg.visible = false;
+      }
+    }
+    // chem tao loc: kiem quet, loc xoay va luoi kiem bay ve phia quai
+    const env = slashT > 0 ? Math.sin(kk * Math.PI) : 0;
+    const rad = T.pulse_radius * 0.5;
+    const travel = kk * slashDist;
+    const cx = P.pos[0] + slashDir[0] * travel;
+    const cz = P.pos[2] + slashDir[1] * travel;
+    blades.forEach((b, i) => {
+      const a = kk * Math.PI * 7 + (i * Math.PI * 2) / 3;
+      b.position.set(P.pos[0] + Math.cos(a) * 1.7 * env, P.pos[1] + 1.5 + Math.sin(kk * 9 + i) * 0.1, P.pos[2] + Math.sin(a) * 1.7 * env);
+      b.material.rotation = -a;
+      b.material.opacity = env * 0.8;
+    });
+    wave.position.set(cx, P.pos[1] + 1.15, cz);
+    wave.rotation.set(0, Math.atan2(slashDir[0], slashDir[1]), 0);
+    wave.rotation.z = Math.PI * 0.025;
+    wave.scale.setScalar(0.8 + kk * 1.6);
+    wave.material.opacity = env * 0.95;
+    twister.position.set(cx, P.pos[1], cz);
+    twRings.forEach((r) => {
+      const i = r.userData.i;
+      const s2 = rad * (0.25 + i * 0.16) * (0.5 + env * 0.8);
+      r.scale.set(s2, s2, s2);
+      r.position.y = 0.2 + i * 0.6 * (0.6 + env * 0.6);
+      r.rotation.z = time * (9 + i * 2) * (i % 2 ? 1 : -1);
+      r.material.opacity = env * (0.6 - i * 0.07) * (settings.reduceMotion ? 0.5 : 1);
+    });
+  }
+  {
+    // canh hoa troi quanh nguoi choi
+    const pa = petalGeo.attributes.position.array;
+    for (let i = 0; i < PETALS; i++) {
+      const sp1 = 0.5 + (i % 5) * 0.18;
+      const k = (i * 13.37 + time * sp1 * 1.4) % 36;
+      pa[i * 3] = P.pos[0] + ((i * 7.31) % 30) - 15 + Math.sin(time * 0.7 + i) * 1.5 + k * 0.25 - 4.5;
+      pa[i * 3 + 1] = P.pos[1] + 9 - k * 0.3 + Math.sin(time * 2 + i * 2) * 0.25;
+      pa[i * 3 + 2] = P.pos[2] + ((i * 11.9) % 30) - 15 + Math.cos(time * 0.6 + i) * 1.5;
+    }
+    petalGeo.attributes.position.needsUpdate = true;
+    petals.visible = !lowGfx && !BENCH && !settings.reduceMotion;
   }
   animateScenery(time);
   // gio
@@ -1520,13 +2297,16 @@ function syncViews(time) {
   windSound(g.wind.active && mode === "play" && !g.paused);
 }
 
+let camZoom = 1.12; // cuon chuot de xem rong hon / gan hon
+addEventListener("wheel", (e) => { camZoom = Math.min(1.9, Math.max(0.8, camZoom + Math.sign(e.deltaY) * 0.08)); }, { passive: true });
 function updateCamera(dt) {
+  if (mode === "menu") yaw += 7 * dt; // sanh cho: camera quay cham quanh Mây
   const P = game.player;
   const th = (yaw * Math.PI) / 180;
   const f = [Math.sin(th), Math.cos(th)];
   const y = Math.max(P.pos[1], -2);
   const target = new THREE.Vector3(P.pos[0] + f[0] * 3, 1.2 + y * 0.9, P.pos[2] + f[1] * 3);
-  const want = new THREE.Vector3(P.pos[0] - f[0] * 11, 7.5 + y * 0.95, P.pos[2] - f[1] * 11);
+  const want = new THREE.Vector3(P.pos[0] - f[0] * 11 * camZoom, 7.5 * camZoom + y * 0.95, P.pos[2] - f[1] * 11 * camZoom);
   camera.position.lerp(want, 1 - Math.exp(-8 * dt));
   if (shake > 0) {
     camera.position.x += Math.sin(shake * 90) * shake * 0.4;
@@ -1583,12 +2363,14 @@ function frame(now) {
     benchFrame(now);
     return;
   }
-  if (fpsLow && !lowGfx && mode === "play") {
+  if (fpsLow && !lowGfx && mode === "play" && !params.has("high")) { // ?high: giu do hoa cao, khong tu ha cap
     // may yeu: da giam do phan giai toi muc thap nhat van < 28 FPS -> tat cay co, may, den troi (khong anh huong luat choi)
     lowGfx = true;
     if (terrain?.userData.props) terrain.userData.props.visible = false;
     skyGroup.visible = false;
     for (const l of skyLanterns) l.visible = false;
+    for (const m of auroras) m.visible = false;
+    shootStar.visible = false;
   }
   if (!game) {
     renderer.render(scene, camera);
@@ -1744,6 +2526,8 @@ function startBench() {
   if (terrain?.userData.props) terrain.userData.props.visible = false;
   skyGroup.visible = false;
   for (const l of skyLanterns) l.visible = false;
+  for (const m of auroras) m.visible = false; // bench: khong co hieu ung sang tao
+  shootStar.visible = false;
   resize();
 }
 
